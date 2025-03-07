@@ -53,7 +53,7 @@ const Register: React.FC = () => {
         serviceType: '',
     });
 
-    const [validation, setValidation] = useState<FormValidation>({});
+    const [validation] = useState<FormValidation>({});
     const [showPassword, setShowPassword] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');

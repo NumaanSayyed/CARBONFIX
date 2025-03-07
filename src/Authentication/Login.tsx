@@ -12,7 +12,7 @@ const Login: React.FC = () => {
     const [forgotEmail, setForgotEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [resetSuccess, setResetSuccess] = useState(false);
-    const [userType, setUserType] = useState('Participant');
+    const [] = useState('Participant');
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -61,19 +61,7 @@ const Login: React.FC = () => {
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         {/* USER TYPE DROPDOWN  */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">User Type</label>
-                            <select
-                                value={userType}
-                                onChange={(e) => setUserType(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                            >
-                                <option value="participant">Participant</option>
-                                <option value="college">College</option>
-                                <option value="service_provider">Service Provider</option>
-                            </select>
-                        </div>
-
+                       
                         <div>
                             
                             <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
