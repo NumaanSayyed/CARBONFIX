@@ -5,7 +5,7 @@ import Leaderboard from "../Components/Leaderboard";
 import AboutPlatform from "../Components/AboutPlatform";
 import Testimonials from "../Components/Testimonial";
 import FeaturedPrograms from "../Components/FeaturedProgram";
-
+import FAQ from "../Components/FAQ";
 const Homepage: React.FC = () => {
     const [carbonSaved, setCarbonSaved] = useState(0);
     const [treesPlanted, setTreesPlanted] = useState(0);
@@ -57,6 +57,8 @@ const Homepage: React.FC = () => {
 
             {/* Testimonials Section */}
             <Testimonials />
+
+            <FAQ />
         </>
     );
 };

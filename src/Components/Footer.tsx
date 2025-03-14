@@ -1,10 +1,9 @@
 import React from "react";
 
 const socialLinks = [
-    { icon: "fa-twitter", hover: "hover:text-blue-400" },
-    { icon: "fa-facebook", hover: "hover:text-blue-600" },
-    { icon: "fa-linkedin", hover: "hover:text-blue-500" },
-    { icon: "fa-instagram", hover: "hover:text-pink-500" },
+    { icon: "fa-facebook", hover: "hover:text-blue-600", link:"https://www.facebook.com/people/ZED-Foundation/100067395920505/?mibextid=LQQJ4d"  },
+    { icon: "fa-youtube", hover: "hover:text-blue-500", link:"https://www.youtube.com/channel/UCYzWps_9sLJHPYhsor_9x4A?app=desktop" },
+    { icon: "fa-instagram", hover: "hover:text-pink-500", link: "https://www.instagram.com/zedfoundation?igsh=MWNseGdoYWJ2MW8zbg%3D%3D&utm_source=qr" },
 ];
 
 const quickLinks = ["Home", "Programs" ];
@@ -31,7 +30,7 @@ const Footer: React.FC = () => {
                             {socialLinks.map((social, index) => (
                                 <a
                                     key={index}
-                                    href="#"
+                                    href={social.link}
                                     className={`text-gray-400 transition-colors duration-300 text-xl ${social.hover}`}
                                 >
                                     <i className={`fab ${social.icon}`}></i>
@@ -50,9 +49,9 @@ const Footer: React.FC = () => {
                     <div>
                         <h3 className="text-lg font-semibold mb-6">Stay Updated</h3>
                         <p className="text-gray-400 mb-4">
-                            Subscribe to our newsletter for the latest updates on environmental initiatives.
+                            Connect with carbonfix and stay tuned with the  latest updates on environmental initiatives.
                         </p>
-                        <div className="relative">
+                        {/* <div className="relative">
                             <input
                                 type="email"
                                 placeholder="Enter your email"
@@ -61,7 +60,7 @@ const Footer: React.FC = () => {
                             <button className="!rounded-button absolute right-2 top-2 bg-green-500 hover:bg-green-600 text-white px-4 py-1 text-sm font-semibold transition-all duration-300 whitespace-nowrap">
                                 Subscribe
                             </button>
-                        </div>
+                        </div> */}
                         <div className="mt-6">
                             <h4 className="text-sm font-semibold mb-2">Contact Us</h4>
                             <p className="text-gray-400 text-sm">
@@ -77,9 +76,9 @@ const Footer: React.FC = () => {
                 {/* Copyright & Legal Links */}
                 <div className="border-t border-gray-800 pt-8">
                     <div className="flex flex-col md:flex-row justify-between items-center">
-                        <div className="text-gray-400 text-sm mb-4 md:mb-0">
+                        {/* <div className="text-gray-400 text-sm mb-4 md:mb-0">
                             © {new Date().getFullYear()} CarbonFix. All rights reserved.
-                        </div>
+                        </div> */}
                         <div className="flex space-x-6">
                             {legalLinks.map((link, index) => (
                                 <a key={index} href="#" className="text-gray-400 hover:text-green-400 text-sm transition-colors duration-300">

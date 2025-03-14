@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 interface HeaderProps {
@@ -9,14 +9,21 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ isScrolled, activeNav, setActiveNav }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [navbarTextColor, setNavbarTextColor] = useState("text-white");
+
+    useEffect(() => {
+        // Change text color dynamically when scrolled
+        setNavbarTextColor(isScrolled ? "text-gray-800 hover:text-green-600" : "text-white hover:text-green-200");
+    }, [isScrolled]);
 
     return (
         <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? "bg-white shadow-lg" : "bg-transparent"}`}>
             <div className="container mx-auto px-6">
                 <div className="flex items-center justify-between h-16 sm:h-20">
+
                     {/* Logo */}
                     <div className="flex items-center">
-                        <Link to="/" className={`text-xl sm:text-2xl font-bold ${isScrolled ? "text-green-700" : "text-white"}`}>
+                        <Link to="/" className={`text-xl sm:text-2xl font-bold ${isScrolled ? "text-green-700" : "text-gray-600"}`}>
                             <i className="fas fa-globe-americas mr-2"></i>
                             CarbonFix
                         </Link>
@@ -32,9 +39,8 @@ const Header: React.FC<HeaderProps> = ({ isScrolled, activeNav, setActiveNav }) 
                                 to={item.route}
                                 key={item.id}
                                 onClick={() => setActiveNav(item.id)}
-                                className={`text-sm font-semibold transition-all duration-300 relative
-                  ${isScrolled ? "text-gray-800 hover:text-green-600" : "text-white hover:text-green-200"}
-                  ${activeNav === item.id ? 'after:content-[""] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-0.5 after:bg-current' : ""}`}
+                                className={`text-sm  font-semibold transition-all duration-300 relative ${navbarTextColor} 
+                                    ${activeNav === item.id ? 'after:content-[""] after:absolute after:bottom-[-4px]  after:left-0 after:w-full after:h-0.5 after:bg-current' : ""}`}
                             >
                                 {item.label}
                             </Link>
@@ -46,8 +52,9 @@ const Header: React.FC<HeaderProps> = ({ isScrolled, activeNav, setActiveNav }) 
                     </div>
 
                     {/* Mobile Menu Button (Hamburger) */}
-                    <button className="md:hidden text-2xl text-gray-800 z-50 relative" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                        <i className={`fas ${isMenuOpen ? "fa-times" : "fa-bars"} ${isScrolled ? "text-gray-800" : "text-white"}`}></i>
+                    <button className={`md:hidden text-2xl z-50 relative ${isScrolled ? "text-gray-800" : "text-white"}`}
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                        <i className={`fas ${isMenuOpen ? "fa-times" : "fa-bars"}`}></i>
                     </button>
                 </div>
 

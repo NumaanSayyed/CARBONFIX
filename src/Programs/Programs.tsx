@@ -11,10 +11,10 @@ const App: React.FC = () => {
     // Declare categories BEFORE using it
     const categories = [
         { name: 'Forestation', icon: 'fa-tree' },
-        { name: 'Water Conservation', icon: 'fa-tint' },
-        { name: 'Soil Restoration', icon: 'fa-leaf' },
-        { name: 'E-Waste Management', icon: 'fa-recycle' },
-        { name: 'Animal Protection', icon: 'fa-paw' }
+        { name: 'Water', icon: 'fa-tint' },
+        { name: 'Soil', icon: 'fa-leaf' },
+        { name: 'E-Waste', icon: 'fa-recycle' },
+        { name: 'Animal', icon: 'fa-paw' }
     ];
 
     // Apply filtering AFTER declaring categories
@@ -53,7 +53,7 @@ const App: React.FC = () => {
         {
             id: 4,
             title: 'E-Waste Recovery',
-            category: 'E-waste',
+            category: 'E-Waste',
             description: 'Transforming electronic waste into valuable resources through innovative recycling and upcycling processes.',
             progress: 45,
             participants: 1243,
@@ -62,7 +62,7 @@ const App: React.FC = () => {
         {
             id: 5,
             title: 'Wildlife Protection',
-            category: 'Animal Conservation',
+            category: 'Animal',
             description: 'Protecting endangered species through habitat preservation and anti-poaching initiatives.',
             progress: 65,
             participants: 2156,
