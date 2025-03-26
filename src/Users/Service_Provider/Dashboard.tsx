@@ -10,12 +10,42 @@ const Dashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState<any>(null);
-const [programs, ] = useState([
-    { id: 1, name: "Forest Restoration Initiative", category: "Forestation", credits: 2500, status: "Active" },
-    { id: 2, name: "Clean Water Conservation", category: "Water", credits: 1800, status: "Pending" },
-    { id: 3, name: "Soil Enrichment Program", category: "Soil", credits: 3200, status: "Completed" },
-    { id: 4, name: "Wildlife Protection Drive", category: "Animal", credits: 1500, status: "Pending" },  // 
-    { id: 5, name: "E-Waste Recycling Initiative", category: "E-Waste", credits: 2800, status: "Completed" } 
+  const [programs] = useState([
+    {
+      id: 1,
+      name: "Forest Restoration Initiative",
+      category: "Forestation",
+      credits: 2500,
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Clean Water Conservation",
+      category: "Water",
+      credits: 1800,
+      status: "Pending",
+    },
+    {
+      id: 3,
+      name: "Soil Enrichment Project",
+      category: "Soil",
+      credits: 3200,
+      status: "Completed",
+    },
+    {
+      id: 4,
+      name: "Wildlife Protection Drive",
+      category: "Animal",
+      credits: 1500,
+      status: "Pending",
+    }, //
+    {
+      id: 5,
+      name: "E-waste Recycling Initiative",
+      category: "re-cycle",
+      credits: 2800,
+      status: "Completed",
+    },
   ]);
 
   // Form States
@@ -26,7 +56,6 @@ const [programs, ] = useState([
   const [startDate, setStartDate] = useState("");
   const [completionDate, setCompletionDate] = useState("");
 
-  
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,20 +78,32 @@ const [programs, ] = useState([
         <ActionButton setIsModalOpen={setIsModalOpen} />
 
         {/* Navigation Button */}
-        <NavigationButton onClick={() => console.log("Navigating to Enrolled Participants...")} />
+        <NavigationButton
+          onClick={() => console.log("Navigating to Enrolled Participants...")}
+        />
 
-        {/* Programs Grid */}
-        <ProgramsGrid programs={programs} setSelectedProgram={setSelectedProgram} setIsDetailModalOpen={setIsDetailModalOpen} />
+        {/* Projects Grid */}
+        <ProgramsGrid
+          programs={programs}
+          setSelectedProgram={setSelectedProgram}
+          setIsDetailModalOpen={setIsDetailModalOpen}
+        />
 
         {/* Detail Modal */}
-        <DetailModal isOpen={isDetailModalOpen} program={selectedProgram} onClose={() => setIsDetailModalOpen(false)} />
+        <DetailModal
+          isOpen={isDetailModalOpen}
+          program={selectedProgram}
+          onClose={() => setIsDetailModalOpen(false)}
+        />
 
         {/* Add New Service Modal */}
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Service Category */}
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">Service Category</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Service Category
+              </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -73,14 +114,16 @@ const [programs, ] = useState([
                 <option value="Forestation">Forestation</option>
                 <option value="Water">Water</option>
                 <option value="Soil">Soil</option>
-                <option value="E-Waste">E-Waste</option>
+                <option value="re-cycle">re-cycle</option>
                 <option value="Animal">Animal</option>
               </select>
             </div>
 
-            {/* Program Name */}
+            {/* Project Name */}
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">Program Name</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Program Name
+              </label>
               <input
                 type="text"
                 value={programName}
@@ -92,7 +135,9 @@ const [programs, ] = useState([
 
             {/* Carbon Credits */}
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">Carbon Credits</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Carbon Credits
+              </label>
               <input
                 type="number"
                 value={carbonCredits}
@@ -104,7 +149,9 @@ const [programs, ] = useState([
 
             {/* Program Start Date */}
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">Program Start Date</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Project Start Date
+              </label>
               <input
                 type="date"
                 value={startDate}
@@ -116,7 +163,9 @@ const [programs, ] = useState([
 
             {/* Estimated Completion Date */}
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">Estimated Completion Date</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Estimated Completion Date
+              </label>
               <input
                 type="date"
                 value={completionDate}
@@ -128,7 +177,9 @@ const [programs, ] = useState([
 
             {/* Remarks */}
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">Remarks</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Remarks
+              </label>
               <textarea
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
@@ -146,7 +197,6 @@ const [programs, ] = useState([
             </button>
           </form>
         </Modal>
-
       </div>
     </div>
   );

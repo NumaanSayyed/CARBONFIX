@@ -1,8 +1,7 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
+import "swiper/swiper-bundle.css";
 
 const testimonials = [
     {
@@ -19,7 +18,7 @@ const testimonials = [
         impact: 3120,
         rating: 5,
         image: "https://public.readdy.ai/ai/img_res/abbcf48ab1793174ff203b8812c39530.jpg",
-        text: "As a business owner, I wanted to make our operations more sustainable. This platform provided the perfect solution with its comprehensive tracking and verified offset programs.",
+        text: "As a business owner, I wanted to make our operations more sustainable. This platform provided the perfect solution with its comprehensive tracking and verified offset projects.",
     },
     {
         name: "Sophie Anderson",
@@ -89,7 +88,7 @@ const TestimonialCard: React.FC<{ testimonial: any; }> = ({ testimonial }) => (
             <div className="flex items-center text-green-600">
                 <i className="fas fa-leaf mr-2"></i>
                 <span className="font-semibold">{testimonial.impact.toLocaleString()}</span>
-                <span className="ml-2 text-sm text-gray-600">kg CO₂ offset</span>
+                <span className="ml-2 text-sm text-gray-600">Carbon Credit offset</span>
             </div>
         </div>
     </div>

@@ -4,7 +4,7 @@ const RecentActivity: React.FC = () => {
   const activities = [
     { user: "Emily Thompson", action: "validated", project: "Forest Conservation Project", time: "2 hours ago" },
     { user: "Michael Chen", action: "rejected", project: "Solar Farm Initiative", time: "4 hours ago" },
-    { user: "Sarah Williams", action: "pending", project: "Wind Energy Program", time: "5 hours ago" },
+    { user: "Sarah Williams", action: "pending", project: "Wind Energy Project", time: "5 hours ago" },
     { user: "David Martinez", action: "validated", project: "Ocean Cleanup Initiative", time: "6 hours ago" },
   ];
 

@@ -18,7 +18,9 @@ interface ParticipantListProps {
     viewMode: "grid" | "list";
     setSelectedParticipant: (participant: Participant) => void;
     setShowViewModal: (value: boolean) => void;
-    setUpdateFormData: (data: { credits: string; remarks: string; }) => void;
+    // setUpdateFormData: (data: { credits: string; remarks: string; }) => void;
+    setUpdateFormData: (data: { credits?: string; remarks: string }) => void;
+
     setShowUpdateModal: (value: boolean) => void;
     selectedParticipant: Participant | null;
 }
@@ -98,7 +100,7 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    {["S.No", "Participant", "Area", "Program", "Status", "Credits Earned", "Credits Allocated", "Actions"].map(
+                                    {["S.No", "Participant", "Area", "Project", "Status", "Credits Earned", "Credits Allocated", "Actions"].map(
                                         (heading) => (
                                             <th
                                                 key={heading}

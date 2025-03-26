@@ -7,7 +7,7 @@ import UpdateProofStatusModal from "./Components/UpdateProofStatusModal";
 import ParticipantList from "./Components/ParticipantList";
 // import PendingEnrollments from "./Components/PendingEnrollments";
 
-// ✅ Define Participant Type
+//Participant Type
 interface Participant {
     id: string;
     name: string;
@@ -19,22 +19,21 @@ interface Participant {
     creditsEarned?: number;
     creditsAllocated?: number;
     email?: string;
-    proofImage?: string; // Single image URL
-    proofVideo?: string; // Single video URL
+    proofImage?: string; 
+    proofVideo?: string;
     area?: string;
 }
 
-// ✅ Define Notification Type
+//Notification Type
 interface Notification {
     id: string;
-    type: "enrollment" | "update" | "alert"; // Strictly typed
+    type: "enrollment" | "update" | "alert"; 
     message: string;
     timestamp: string;
     isRead: boolean;
 }
 
 const EnrolledParticipants: React.FC = () => {
-    // ✅ State Management
     const [participants, ] = useState<Participant[]>([
         {
             id: "P1001",
@@ -64,16 +63,20 @@ const EnrolledParticipants: React.FC = () => {
         },
     ]);
 
-    const [viewMode, setViewMode] = useState<"grid" | "list">("grid"); // ✅ Grid/List Mode
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [showNotifications, setShowNotifications] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
-    const [updateFormData, setUpdateFormData] = useState({ credits: "", remarks: "" });
+    // const [updateFormData, setUpdateFormData] = useState({ credits: "", remarks: "" });
+    const [updateFormData, setUpdateFormData] = useState<{ credits?: string; remarks: string }>({ 
+        credits: "", 
+        remarks: "" 
+      });
     const [searchTerm, setSearchTerm] = useState("");
     const [showFilterPanel, setShowFilterPanel] = useState(false);
 
-    // ✅ Sample Notifications Data
+    // Sample Notifications Data
     const notifications: Notification[] = [
         {
             id: "N1001",
@@ -91,7 +94,7 @@ const EnrolledParticipants: React.FC = () => {
         },
     ];
 
-    // ✅ Functions for Notifications
+    //Functions for Notifications
     const toggleNotifications = () => setShowNotifications(!showNotifications);
     const markAllAsRead = () => {
         console.log("Marked all as read");
@@ -102,10 +105,10 @@ const EnrolledParticipants: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#F5F5F5] pt-20"> 
-            {/* ✅ Header Component */}
+            {/*Header Component */}
             <Header toggleNotifications={toggleNotifications} notifications={notifications} />
 
-            {/* ✅ Search & Filter Component */}
+            {/*Search & Filter Component */}
             <SearchFilter
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
@@ -119,7 +122,7 @@ const EnrolledParticipants: React.FC = () => {
             {/* <PendingEnrollments/> */}
 
             
-            {/* ✅ Participant List */}
+            {/*Participant List */}
             <ParticipantList
                 participants={participants}
                 viewMode={viewMode}
@@ -130,7 +133,7 @@ const EnrolledParticipants: React.FC = () => {
                 setUpdateFormData={setUpdateFormData}
             />
 
-            {/* ✅ Notification Panel */}
+            {/*Notification Panel */}
             <NotificationPanel
                 notifications={notifications}
                 showNotifications={showNotifications}
@@ -139,7 +142,7 @@ const EnrolledParticipants: React.FC = () => {
                 clearAllNotifications={clearAllNotifications}
             />
 
-            {/* ✅ View Participant Modal */}
+            {/*View Participant Modal */}
             <ViewParticipantModal
                 selectedParticipant={selectedParticipant}
                 showViewModal={showViewModal}
@@ -148,12 +151,15 @@ const EnrolledParticipants: React.FC = () => {
                 setUpdateFormData={setUpdateFormData}
             />
 
-            {/* ✅ Update Proof Status Modal */}
+            
+
+            {/*Update Proof Status Modal */}
             <UpdateProofStatusModal
                 showUpdateModal={showUpdateModal}
                 setShowUpdateModal={setShowUpdateModal}
                 updateFormData={updateFormData}
                 setUpdateFormData={setUpdateFormData}
+                // setUpdateFormData={setUpdateFormData}
             />
         </div>
     );

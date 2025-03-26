@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
+
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
 import Homepage from "./Homepage/Homepage";
-import Programs from "./Programs/Programs";
+import Projects from "./Programs/Programs";
 import Login from "./Authentication/Login";
 import Register from "./Authentication/Register";
 import Profile from "./Users/Participants/Profile";
@@ -19,13 +21,25 @@ import StudentList from "./Users/College/StudentList";
 import AdminDashboard from "./Users/Admin/Dashboard";
 
 function App() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [activeNav, setActiveNav] = useState("home");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50); // Change state when scrolled past 50px
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <BrowserRouter>
-      <Header isScrolled={false} activeNav="home" setActiveNav={() => { }} />
+      <Header isScrolled={isScrolled} activeNav={activeNav} setActiveNav={setActiveNav} />
 
       <Routes>
         <Route path="/" element={<Homepage />} />
-        <Route path="/program" element={<Programs />} />
+        <Route path="/project" element={<Projects />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />

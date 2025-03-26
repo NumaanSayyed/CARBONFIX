@@ -21,7 +21,7 @@ const featuredPrograms = [
 const FeaturedProgram: React.FC = () => {
     return (
         <div className="container mx-auto px-6 py-24">
-            <h2 className="text-4xl font-bold text-gray-800 mb-12 text-center">Featured Environmental Programs</h2>
+            <h2 className="text-4xl font-bold text-gray-800 mb-12 text-center">Featured Environmental projects</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {featuredPrograms.map((program, index) => (

@@ -4,15 +4,17 @@ interface StatsProps {
     carbonSaved: number;
     treesPlanted: number;
     participants: number;
+    carbonCredits: number;
 }
 
-const Stats: React.FC<StatsProps> = ({ carbonSaved, treesPlanted, participants }) => {
+const Stats: React.FC<StatsProps> = ({ carbonSaved, treesPlanted, participants , carbonCredits }) => {
     return (
         <div className="container mx-auto px-6 -mt-32 relative z-20">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <StatCard icon="fa-cloud" value={carbonSaved} label="Active Participants" />
                 <StatCard icon="fa-tree" value={treesPlanted} label="Service Providers " />
                 <StatCard icon="fa-users" value={participants} label="Colleges" />
+                <StatCard icon="fas fa-seedling" value={carbonCredits} label="Carbon Credits" />
             </div>
         </div>
     );

@@ -34,7 +34,7 @@ const ProjectTrendsChart: React.FC = () => {
         {
           name: "Carbon Credits",
           type: "line",
-          data: data[selectedPeriod],
+          data: data[selectedPeriod as keyof typeof data],
           smooth: true,
           symbol: "circle",
           symbolSize: 8,

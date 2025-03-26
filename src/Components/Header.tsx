@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link , useLocation } from "react-router-dom";
 
 interface HeaderProps {
     isScrolled: boolean;
@@ -8,13 +8,14 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ isScrolled, activeNav, setActiveNav }) => {
+    const location = useLocation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [navbarTextColor, setNavbarTextColor] = useState("text-white");
 
     useEffect(() => {
-        // Change text color dynamically when scrolled
-        setNavbarTextColor(isScrolled ? "text-gray-800 hover:text-green-600" : "text-white hover:text-green-200");
-    }, [isScrolled]);
+        setNavbarTextColor(isScrolled || location.pathname !== "/" ? "text-black hover:text-green-600" : "text-white hover:text-green-200");
+    }, [isScrolled, location.pathname]);
+    
 
     return (
         <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? "bg-white shadow-lg" : "bg-transparent"}`}>
@@ -33,14 +34,14 @@ const Header: React.FC<HeaderProps> = ({ isScrolled, activeNav, setActiveNav }) 
                     <div className="hidden md:flex items-center space-x-6">
                         {[
                             { id: "home", label: "Home", route: "/" },
-                            { id: "programs", label: "Programs", route: "/program" },
+                            { id: "projects", label: "Projects", route: "/project" },
                         ].map((item) => (
                             <Link
                                 to={item.route}
                                 key={item.id}
                                 onClick={() => setActiveNav(item.id)}
-                                className={`text-sm  font-semibold transition-all duration-300 relative ${navbarTextColor} 
-                                    ${activeNav === item.id ? 'after:content-[""] after:absolute after:bottom-[-4px]  after:left-0 after:w-full after:h-0.5 after:bg-current' : ""}`}
+                                className={`text-sm font-semibold transition-all duration-300 relative ${navbarTextColor} 
+                                    ${activeNav === item.id ? 'after:content-[""] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-0.5 after:bg-current' : ""}`}
                             >
                                 {item.label}
                             </Link>
@@ -54,7 +55,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled, activeNav, setActiveNav }) 
                     {/* Mobile Menu Button (Hamburger) */}
                     <button className={`md:hidden text-2xl z-50 relative ${isScrolled ? "text-gray-800" : "text-white"}`}
                         onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                        <i className={`fas ${isMenuOpen ? "fa-times" : "fa-bars"}`}></i>
+                        <i className={` ${location.pathname === "/" ? "" : "text-black"} fas ${isMenuOpen ? "" : "fa-bars"}`}></i>
                     </button>
                 </div>
 
@@ -69,7 +70,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled, activeNav, setActiveNav }) 
                             <nav className="flex flex-col space-y-6">
                                 {[
                                     { id: "home", label: "Home", route: "/" },
-                                    { id: "programs", label: "Programs", route: "/program" },
+                                    { id: "projects", label: "Projects", route: "/project" },
                                 ].map((item) => (
                                     <Link
                                         to={item.route}
@@ -85,7 +86,12 @@ const Header: React.FC<HeaderProps> = ({ isScrolled, activeNav, setActiveNav }) 
                                 ))}
                                 <button className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg whitespace-nowrap">
                                     <i className="fas fa-user-plus mr-2"></i>
-                                    Join Now
+                                    <Link 
+                                    to="/register"
+                                    onClick={() => {
+                                        setIsMenuOpen(false);
+                                    }}
+                                    >Join Now</Link>
                                 </button>
                             </nav>
                         </div>

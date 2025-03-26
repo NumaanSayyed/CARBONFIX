@@ -8,19 +8,19 @@ interface ProofVerificationModalProps {
 const ProofVerificationModal: React.FC<ProofVerificationModalProps> = ({ showModal, setShowModal }) => {
   const [popupType, setPopupType] = useState<"image" | "video" | "youtube" | null>(null);
 
-  // ✅ Dummy data for proof
+  //Dummy data for proof
   const proofImage = "https://via.placeholder.com/600x400?text=Proof+Image";
   const videoUrl = "https://www.w3schools.com/html/mov_bbb.mp4";
-  const youtubeUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ"; // Sample YouTube video
+  const youtubeUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ";
 
   if (!showModal) return null;
 
   return (
     <>
-      {/* ✅ Main Modal */}
+      {/* Main Modal */}
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
         <div className="bg-white rounded-xl w-[90vw] h-[90vh] flex flex-col shadow-lg relative">
-          {/* ✅ Header */}
+          {/* Header */}
           <div className="flex justify-between items-center p-6 border-b border-gray-100">
             <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
               <i className="fas fa-file-alt text-emerald-500"></i> Proof Verification Details
@@ -33,10 +33,10 @@ const ProofVerificationModal: React.FC<ProofVerificationModalProps> = ({ showMod
             </button>
           </div>
 
-          {/* ✅ Content Section */}
+          {/*Content Section */}
           <div className="flex-1 overflow-y-auto p-6">
             <div className="grid grid-cols-3 gap-6 h-full">
-              {/* ✅ Proof Preview Section */}
+              {/* Proof Preview Section */}
               <div className="col-span-2 bg-gray-50 rounded-xl p-4 flex flex-col">
                 <div className="bg-black rounded-lg flex-1 mb-4 relative group cursor-pointer">
                   <img
@@ -65,7 +65,7 @@ const ProofVerificationModal: React.FC<ProofVerificationModalProps> = ({ showMod
                 </div>
               </div>
 
-              {/* ✅ Participant Details */}
+              {/* Participant Details */}
               <div className="bg-gray-50 rounded-xl p-6 flex flex-col">
                 <h4 className="text-lg font-semibold text-gray-800 mb-4">Participant Details</h4>
                 <div className="space-y-4">
@@ -78,7 +78,7 @@ const ProofVerificationModal: React.FC<ProofVerificationModalProps> = ({ showMod
                     <p className="text-gray-800 font-medium">johndoe@example.com</p>
                   </div>
                   <div>
-                    <label className="text-sm text-gray-600 block mb-1">Program Type</label>
+                    <label className="text-sm text-gray-600 block mb-1">Project Type</label>
                     <p className="text-gray-800 font-medium">Afforestation Project</p>
                   </div>
                   <div>
@@ -97,11 +97,11 @@ const ProofVerificationModal: React.FC<ProofVerificationModalProps> = ({ showMod
         </div>
       </div>
 
-      {/* ✅ Popups for Image, Video, and YouTube */}
+      {/*Popups for Image, Video, and YouTube */}
       {popupType && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-4 shadow-lg relative w-[80vw] max-w-3xl">
-            {/* ✅ Close Button */}
+            {/*Close Button */}
             <button
               onClick={() => setPopupType(null)}
               className="absolute top-3 right-3 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-all"
@@ -109,7 +109,7 @@ const ProofVerificationModal: React.FC<ProofVerificationModalProps> = ({ showMod
               <i className="fas fa-times text-gray-600"></i>
             </button>
 
-            {/* ✅ Content based on selected media type */}
+            {/*Content based on selected media type */}
             {popupType === "image" && (
               <>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Image Proof</h3>
