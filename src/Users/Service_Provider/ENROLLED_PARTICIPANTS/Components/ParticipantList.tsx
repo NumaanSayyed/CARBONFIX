@@ -4,7 +4,7 @@ interface Participant {
     id: string;
     name: string;
     avatar: string;
-    status: "Active" | "Pending" | "Inactive";
+    status:  "Approved" | "Pending" | "Completed" | "Proof Submitted";
     serviceType: string;
     enrollmentDate: string;
     location: string;
@@ -38,6 +38,10 @@ const getStatusColor = (status: string) => {
     }
 };
 
+const formatStandardDate = (dateString: string) => {
+    return new Date(dateString).toISOString().split("T")[0]; // Converts to YYYY-MM-DD
+  };
+
 const ParticipantList: React.FC<ParticipantListProps> = ({
     participants,
     viewMode,
@@ -63,7 +67,7 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                                     className="w-12 h-12 rounded-full object-cover"
                                 />
                                 <div className="flex-1">
-                                    <h3 className="font-medium text-gray-900">{participant.name}</h3>
+                                    <h3 className="font-medium text-gray-900">{participant.name ?? "Humaira"}</h3>
                                     <p className="text-sm text-gray-500">ID: {participant.id}</p>
                                 </div>
                             </div>
@@ -88,7 +92,7 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-500">Enrollment Date</p>
-                                    <p className="text-sm font-medium text-gray-900">{participant.enrollmentDate}</p>
+                                    <p className="text-sm font-medium text-gray-900">{formatStandardDate(participant.enrollmentDate)}</p>
                                 </div>
                             </div>
                         </div>
@@ -137,8 +141,8 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-900">{participant.serviceType}</td>
                                             <td className="px-6 py-4 text-sm text-gray-900">{participant.location}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-900">{participant.serviceType}</td>
                                             <td className="px-6 py-4">
                                                 <span
                                                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router";
+import axios from "axios";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -13,14 +14,61 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [userType, setUserType] = useState("Participant");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    // Simulating API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+  e.preventDefault();
+  setLoading(true);
+
+  //API endpoint based on user type
+  let endpoint = "";
+  if (userType === "Participant") {
+    endpoint = "http://localhost:5000/participants/login";
+  } else if (userType === "Service Provider") {
+    endpoint = "http://localhost:5000/serviceProviders/login";
+  } else if (userType === "College") {
+    endpoint = "http://localhost:5000/colleges/login";
+  }
+
+  try {
+    const response = await axios.post(
+      endpoint,
+      { email, password },
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      }
+    );
+
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userType",userType);
+      localStorage.setItem('user', JSON.stringify(response.data));
+      
+    }    
+    // redirect after successfull login
+    if(userType === 'Participant'){
+      window.location.href = '/profile';
+    }else if(userType === 'Service Provider'){
+      window.location.href = '/dashboard/service_provider';
+    }
+
+  } catch (error: any) {
+    if (error.response) {
+      setModalMessage(error.response.data.error || "Invalid email or password.");
+    } else if (error.request) {
+      setModalMessage("Network error. Please check your connection.");
+    } else {
+      setModalMessage("An unexpected error occurred.");
+    }
+    setIsModalOpen(true);
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +79,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 relative overflow-hidden pt-8">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
@@ -73,7 +121,7 @@ const Login: React.FC = () => {
                 onChange={(e) => setUserType(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
-                <option value="" disabled selected>
+                <option value="" disabled >
                   Select User Type
                 </option>
                 <option value="Participant">Participant</option>
@@ -234,6 +282,22 @@ const Login: React.FC = () => {
           </div>
         </div>
       )}
+
+       {/* Modal */}
+       {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+              <p className="text-center text-gray-800 mb-4">{modalMessage}</p>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 !rounded-button whitespace-nowrap"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
     </div>
   );
 };

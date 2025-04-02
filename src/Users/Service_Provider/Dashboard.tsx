@@ -1,52 +1,71 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./Header";
 import ActionButton from "./ActionButton";
 import NavigationButton from "./NavigationButton";
 import ProgramsGrid from "./Program";
 import DetailModal from "./DetailModal";
 import Modal from "./Modal";
+import axios from "axios";
 
 const Dashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState<any>(null);
-  const [programs] = useState([
+  // const [programs, setPrograms] = useState([]);
+  const [programs, setPrograms] = useState<
     {
-      id: 1,
-      name: "Forest Restoration Initiative",
-      category: "Forestation",
-      credits: 2500,
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Clean Water Conservation",
-      category: "Water",
-      credits: 1800,
-      status: "Pending",
-    },
-    {
-      id: 3,
-      name: "Soil Enrichment Project",
-      category: "Soil",
-      credits: 3200,
-      status: "Completed",
-    },
-    {
-      id: 4,
-      name: "Wildlife Protection Drive",
-      category: "Animal",
-      credits: 1500,
-      status: "Pending",
-    }, //
-    {
-      id: 5,
-      name: "E-waste Recycling Initiative",
-      category: "re-cycle",
-      credits: 2800,
-      status: "Completed",
-    },
-  ]);
+      id: number;
+      name: string;
+      category: string;
+      credits: number;
+      status: string;
+      start_date: string;
+      end_date: string;
+      remark:string
+    }[]
+  >([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const fetchProjects = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Unauthorized! No token found.");
+        return;
+      }
+
+      const response = await axios.get(
+        "http://localhost:5000/serviceProviders/projects",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const fetchedProjects = response.data.map((project: any) => ({
+        name: project.project_name,
+        category: project.project_category,
+        credits: project.carbon_credits,
+        status: "Active", // Default status
+        id: project.id,
+        start_date: project.start_date,
+        end_date: project.end_date,
+        remark:project.remark
+      }));
+
+      setPrograms(fetchedProjects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // useEffect to fetch projects initially
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
 
   // Form States
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -55,17 +74,100 @@ const Dashboard: React.FC = () => {
   const [remarks, setRemarks] = useState("");
   const [startDate, setStartDate] = useState("");
   const [completionDate, setCompletionDate] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
 
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({
-      programName,
-      selectedCategory,
-      carbonCredits,
-      remarks,
-    });
-    setIsModalOpen(false);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setModalMessage("Unauthorized! Please log in again.");
+      setIsModalOpen(true);
+      return;
+    }
+
+    const requestData = {
+      project_category: selectedCategory,
+      project_name: programName,
+      carbon_credits: carbonCredits,
+      start_date: startDate,
+      end_date: completionDate,
+      remark: remarks,
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/serviceProviders/addProject",
+        requestData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setIsModalOpen(false)
+
+      fetchProjects();
+
+    } catch (error: any) {
+      console.error("Error adding project:", error);
+      setModalMessage(error.response?.data?.error || "Failed to add project");
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleUpdate = async (updatedProgram: any) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Unauthorized! No token found.");
+        return;
+      }
+
+      // Fetch updated project from the backend
+      const response = await axios.get(
+        "http://localhost:5000/serviceProviders/projects",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const fetchedProjects = response.data.map((project: any) => ({
+        name: project.project_name,
+        category: project.project_category,
+        credits: project.carbon_credits,
+        status: "Active",
+        id: project.id,
+        start_date: project.start_date,
+        end_date: project.end_date,
+        remark:project.remark
+      }));
+
+      setPrograms(fetchedProjects);
+    } catch (error) {
+      console.error("Error fetching updated projects:", error);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/serviceProviders/projects/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setModalMessage("Project deleted successfully!");
+      setIsModalOpen(true);
+      fetchProjects();
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      setModalMessage("Failed to delete project.");
+      setIsModalOpen(true);
+    }
   };
 
   return (
@@ -82,19 +184,47 @@ const Dashboard: React.FC = () => {
           onClick={() => console.log("Navigating to Enrolled Participants...")}
         />
 
-        {/* Projects Grid */}
-        <ProgramsGrid
-          programs={programs}
-          setSelectedProgram={setSelectedProgram}
-          setIsDetailModalOpen={setIsDetailModalOpen}
-        />
+        {loading ? (
+          <p className="text-center text-gray-500">Loading projects...</p>
+        ) : programs.length > 0 ? (
+          <ProgramsGrid
+            // programs={programs} // Assign unique key
+            programs={programs.map((proj) => ({
+              ...proj,
+              key: proj.id || proj.name,
+            }))}
+            setSelectedProgram={setSelectedProgram}
+            setIsDetailModalOpen={setIsDetailModalOpen}
+
+            
+          />
+        ) : (
+          <p className="text-center text-gray-500">No projects available.</p>
+        )}
 
         {/* Detail Modal */}
         <DetailModal
           isOpen={isDetailModalOpen}
           program={selectedProgram}
           onClose={() => setIsDetailModalOpen(false)}
+          onUpdate={handleUpdate} // ✅ Pass onUpdate function
+          fetchProjects={fetchProjects}
         />
+
+        {/* Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+              <p className="text-center text-gray-800 mb-4">{modalMessage}</p>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 !rounded-button whitespace-nowrap"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Add New Service Modal */}
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
@@ -122,7 +252,7 @@ const Dashboard: React.FC = () => {
             {/* Project Name */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
-                Program Name
+                Project Name
               </label>
               <input
                 type="text"

@@ -1,23 +1,28 @@
 import React, { useState } from "react";
+import CommonFields from "./Register/commonFields";
+import ParticipantForm from "./Register/participants";
+import CollegeForm from "./Register/college";
+import ServiceProviderForm from "./Register/serviceProvider";
+import axios from "axios";
 
 interface FormData {
   email: string;
   password: string;
   confirmPassword: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  dateOfBirth?: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  dob?: string;
   gender?: string;
   college?: string;
   address: string;
-  organizationName?: string;
-  organizationType?: string;
+  org_name?: string;
+  org_type?: string; // (needs to change the org_typ to service_type in backend)
   collegeName?: string;
   principalName?: string;
   deputyName?: string;
   licenseNumber?: string;
-  serviceType?: string;
+  // serviceType?: string;
 }
 
 interface ValidationState {
@@ -29,131 +34,108 @@ interface FormValidation {
   [key: string]: ValidationState;
 }
 
+const roles = [
+  {
+    id: "participant",
+    title: "Participant",
+    icon: "fa-user",
+    description: "Join as an individual participant",
+    bgImage:
+      "https://public.readdy.ai/ai/img_res/3107fc536b948261e7b284a139f19fe7.jpg",
+  },
+  {
+    id: "college",
+    title: "College",
+    icon: "fa-university",
+    description: "Register as an educational institution",
+    bgImage:
+      "https://public.readdy.ai/ai/img_res/73797788cf92429214913353b38b2dc8.jpg",
+  },
+  {
+    id: "provider",
+    title: "Service Provider",
+    icon: "fa-building",
+    description: "Register as a service provider",
+    bgImage:
+      "https://public.readdy.ai/ai/img_res/ef2d258638c75e806ecee1043adf2c5b.jpg",
+  },
+];
+
 const Register: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
     confirmPassword: "",
-    firstName: "",
-    lastName: "",
-    phoneNumber: "",
-    dateOfBirth: "",
+    first_name: "",
+    last_name: "",
+    phone: "",
+    dob: "",
     gender: "",
     address: "",
     college: "",
-    organizationName: "",
-    organizationType: "",
+    org_name: "",
     collegeName: "",
     principalName: "",
     deputyName: "",
     licenseNumber: "",
-    serviceType: "",
+    // serviceType: "", // service Type in backend it is synced with org_type ( needs to change the org_typ to ser_type in backend )
+    org_type: "",
   });
 
-  const [validation] = useState<FormValidation>({});
-  const [showPassword, setShowPassword] = useState(false);
+  const [validation, setValidation] = useState<FormValidation>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [passwordMatch, setPasswordMatch] = useState(true);
-
-  const roles = [
-    {
-      id: "participant",
-      title: "Participant",
-      icon: "fa-user",
-      description: "Join as an individual participant",
-      bgImage:
-        "https://public.readdy.ai/ai/img_res/3107fc536b948261e7b284a139f19fe7.jpg",
-    },
-    {
-      id: "college",
-      title: "College",
-      icon: "fa-university",
-      description: "Register as an educational institution",
-      bgImage:
-        "https://public.readdy.ai/ai/img_res/73797788cf92429214913353b38b2dc8.jpg",
-    },
-    {
-      id: "provider",
-      title: "Service Provider",
-      icon: "fa-building",
-      description: "Register as a service provider",
-      bgImage:
-        "https://public.readdy.ai/ai/img_res/ef2d258638c75e806ecee1043adf2c5b.jpg",
-    },
-  ];
-
-  const collegeOptions = [
-    "Harvard University",
-    "Stanford University",
-    "MIT",
-    "Oxford University",
-    "Cambridge University",
-    "Yale University",
-    "Princeton University",
-    "Columbia University",
-  ];
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    if (name === "confirmPassword") {
-      setPasswordMatch(value === formData.password);
-    }
-
-    validateField(name, value);
-  };
 
   const validateField = (name: string, value: string) => {
     const newValidation = { ...validation };
 
-    const setValidation = (isValid: boolean, message: string) => {
+    const setValidationState = (isValid: boolean, message: string) => {
       newValidation[name] = { isValid, message };
     };
 
     switch (name) {
       case "email":
-        setValidation(
+        setValidationState(
           /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
           "Please enter a valid email address"
         );
         break;
       case "password":
-        setValidation(
+        setValidationState(
           value.length >= 8,
           "Password must be at least 8 characters"
         );
         break;
       case "confirmPassword":
-        setValidation(value === formData.password, "Passwords do not match");
+        setValidationState(
+          value === formData.password,
+          "Passwords do not match"
+        );
         break;
-      case "phoneNumber":
-        setValidation(
+      case "phone":
+        setValidationState(
           /^\+?[\d\s-]{10,}$/.test(value),
           "Please enter a valid phone number"
         );
         break;
       default:
-        setValidation(value.length > 0, "This field is required");
+        setValidationState(value.length > 0, "This field is required");
     }
 
-    // setValidation(newValidation);
+    setValidation(newValidation);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let isValid = true;
     const requiredFields = [
       "email",
       "password",
-      "firstName",
-      "lastName",
-      "phoneNumber",
+      "first_name",
+      "last_name",
+      "phone",
     ];
 
     requiredFields.forEach((field) => {
@@ -169,12 +151,61 @@ const Register: React.FC = () => {
       return;
     }
 
-    setModalMessage("Account created successfully! Redirecting...");
-    setIsModalOpen(true);
+    let endpoint = "";
+    if (selectedRole === "participant") {
+      endpoint = "http://localhost:5000/participants/register";
+    } else if (selectedRole === "college") {
+      endpoint = "http://localhost:5000/colleges/register";
+    } else if (selectedRole === "provider") {
+      endpoint = "http://localhost:5000/serviceProviders/register";
+    }
+
+    const { confirmPassword, ...filteredFormData } = formData;
+    const cleanedFormData = Object.fromEntries(
+      Object.entries(filteredFormData).filter(
+        ([_, value]) => value && value.toString().trim().length > 0
+      )
+    );
+
+    try {
+      const response = await axios.post(endpoint, cleanedFormData, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+
+      setModalMessage("Account created successfully! Redirecting...");
+      setIsModalOpen(true);
+
+      if (selectedRole === "participant") {
+        window.location.href = "/profile";
+      } else if (selectedRole === "provider") {
+        window.location.href = "/dashboard/service_provider";
+      }
+
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userType", selectedRole);
+        localStorage.setItem("user", JSON.stringify(response.data));
+      }
+    } catch (error: any) {
+      if (error.response) {
+        setModalMessage(
+          error.response.data.error ||
+            (error.response.status === 500
+              ? "Internal server error. Please try again later."
+              : "Something went wrong.")
+        );
+      } else if (error.request) {
+        setModalMessage("Network error. Please check your connection.");
+      } else {
+        setModalMessage("An unexpected error occurred.");
+      }
+      setIsModalOpen(true);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-20 px-4">
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
           Create Your Account
@@ -211,251 +242,39 @@ const Register: React.FC = () => {
 
         {selectedRole && (
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
+            {/* Wrap each form section inside a div with space-y-6 */}
+            <div className="space-y-6">
+              <CommonFields formData={formData} setFormData={setFormData} />
+
+              {selectedRole === "participant" && (
+                <ParticipantForm
+                  formData={formData}
+                  setFormData={setFormData}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
+              )}
+
+              {selectedRole === "college" && (
+                <CollegeForm formData={formData} setFormData={setFormData} />
+              )}
+
+              {selectedRole === "provider" && (
+                <ServiceProviderForm
+                  formData={formData}
+                  setFormData={setFormData}
                 />
-              </div>
+              )}
             </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mobile Number
-                </label>
-                <input
-                  type="phoneNumber"
-                  name="phoneNumber"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={formData.phoneNumber}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Password Field */}
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                  />
-                  {/* Eye Icon for Password */}
-                  <button
-                    type="button"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    <i
-                      className={`fas ${
-                        showPassword ? "fa-eye-slash" : "fa-eye"
-                      }`}
-                    ></i>
-                  </button>
-                </div>
-              </div>
-
-              {/* Confirm Password Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    className={`w-full px-4 py-2 rounded-lg border ${
-                      passwordMatch ? "border-gray-300" : "border-red-500"
-                    } focus:ring-2 ${
-                      passwordMatch
-                        ? "focus:ring-blue-500"
-                        : "focus:ring-red-500"
-                    } focus:border-transparent`}
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                  />
-                  {!passwordMatch && (
-                    <p className="text-red-500 text-xs mt-1">
-                      Passwords do not match
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {selectedRole === "participant" && (
-              <>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Date of Birth
-                    </label>
-                    <input
-                      type="date"
-                      name="dateOfBirth"
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={formData.dateOfBirth}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Gender
-                    </label>
-                    <select
-                      name="gender"
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    College (Optional)
-                  </label>
-                  <select
-                    name="college"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={formData.college}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select College</option>
-                    {collegeOptions.map((college) => (
-                      <option key={college} value={college}>
-                        {college}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            )}
-
-            {selectedRole === "college" && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    College Name
-                  </label>
-                  <input
-                    type="text"
-                    name="collegeName"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={formData.collegeName}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Principal Name
-                    </label>
-                    <input
-                      type="text"
-                      name="principalName"
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={formData.principalName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Deputy Name
-                    </label>
-                    <input
-                      type="text"
-                      name="deputyName"
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={formData.deputyName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {selectedRole === "provider" && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Organization Name
-                  </label>
-                  <input
-                    type="text"
-                    name="organizationName"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={formData.organizationName}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Service Type
-                  </label>
-                  <input
-                    type="text"
-                    name="serviceType"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={formData.serviceType}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </>
-            )}
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 !rounded-button whitespace-nowrap"
+              className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
             >
               Create Account
             </button>
           </form>
         )}
 
+        {/* Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">

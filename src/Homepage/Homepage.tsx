@@ -4,8 +4,9 @@ import Stats from "../Components/Stat";
 import Leaderboard from "../Components/Leaderboard";
 import AboutPlatform from "../Components/AboutPlatform";
 import Testimonials from "../Components/Testimonial";
-import FeaturedPrograms from "../Components/FeaturedProgram";
+import FeaturedProjects from "../Components/FeaturedProject";
 import FAQ from "../Components/FAQ";
+
 const Homepage: React.FC = () => {
     const [carbonSaved, setCarbonSaved] = useState(0);
     const [treesPlanted, setTreesPlanted] = useState(0);
@@ -61,8 +62,8 @@ const Homepage: React.FC = () => {
             {/* About Platform Section */}
             <AboutPlatform />
 
-            {/* Featured Programs Section */}
-            <FeaturedPrograms />
+            {/* Featured Projects Section */}
+            <FeaturedProjects />
 
             {/* Testimonials Section */}
             <Testimonials />

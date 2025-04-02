@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 // import * as echarts from 'echarts';
+import axios from "axios";
 
 const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedProgram, setSelectedProgram] = useState<any>(null);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [isJoining, setIsJoining] = useState<boolean>(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Declare categories BEFORE using it
   const categories = [
@@ -16,12 +21,66 @@ const App: React.FC = () => {
     { name: "Animal", icon: "fa-paw" },
   ];
 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/serviceProviders/allProjects");
+        setProjects(response.data.projects);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  const handleJoinProject = async () => {
+    try {
+      //user data from localStorage
+      const storedUser = localStorage.getItem("user");
+  
+      if (!storedUser) {
+        setMessage("User not logged in.");
+        setIsModalOpen(true);
+        return;
+      }
+      // Parse JSON and extract participant ID
+      const userData = JSON.parse(storedUser);
+      const participantId = userData?.participant?.id;
+  
+      if (!participantId || !selectedProject?.id) {
+        setMessage("Missing participant or project details.");
+        setIsModalOpen(true);
+        return;
+      }
+  
+      setIsJoining(true);
+      console.log("API Request: Joining project", selectedProject.id);
+      // Send API request
+      const response = await axios.post("http://localhost:5000/enroll/request", {
+        participant_id: participantId,
+        project_id: selectedProject.id,
+      });
+
+      console.log(participantId);
+  
+      setMessage(response.data.message || "Enrollment request submitted!");
+      setIsModalOpen(true);
+      console.log("Submitted req to join humaira");
+      setSelectedProject(null)
+    } catch (error: any) {
+      setMessage(error.response?.data?.error || "Failed to submit request.");
+      setIsModalOpen(true);
+    } finally {
+      setIsJoining(false);
+    }
+  };
   // Apply filtering AFTER declaring categories
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const programs = [
+  /*
+  const projects = [
     {
       id: 1,
       title: "Amazon Rainforest Restoration",
@@ -113,6 +172,7 @@ const App: React.FC = () => {
       endDate: "2025-11-25",
     },
   ];
+  */
   
 
   useEffect(() => {
@@ -123,6 +183,10 @@ const App: React.FC = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const formatStandardDate = (dateString: string) => {
+    return new Date(dateString).toISOString().split("T")[0];
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -161,55 +225,56 @@ const App: React.FC = () => {
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {programs
+          {projects
             .filter(
-              (program) =>
+              (project) =>
                 selectedCategory === "All" ||
-                program.category === selectedCategory
+                project.category === selectedCategory
             )
-            .map((program) => (
+            .map((project) => (
               <div
-                key={program.id}
+                key={project.id}
                 className="bg-white rounded-xl shadow-sm overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={program.imageUrl}
-                    alt={program.title}
+                    src={project.imageUrl || 'https://public.readdy.ai/ai/img_res/a86a5d9bd78a933da2be1d249b523709.jpg'}
+                    alt={project.project_category}
                     className="w-full h-full object-cover object-center transform transition-transform duration-300 hover:scale-105"
                   />
                   <div className="absolute top-4 left-4">
                     <span className="bg-white/90 px-3 py-1 rounded-full text-sm font-medium text-gray-700">
-                      {program.category}
+                      {project.project_category}
                     </span>
                   </div>
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    {program.title}
+                    {project.project_name}
                   </h3>
                   <p className="text-gray-600 mb-4 line-clamp-2">
-                    {program.description}
+                    {/* {project.remark} //should be description */}
+                    {project.remark}
                   </p>
                   <div className="mb-4">
                     <div className="flex justify-between text-sm text-gray-500 mb-1">
                       <span>Progress</span>
-                      <span>{program.progress}%</span>
+                      <span>{project.progress}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-green-600 rounded-full h-2 transition-all duration-300"
-                        style={{ width: `${program.progress}%` }}
+                        style={{ width: `${project.progress}%` }}
                       ></div>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500">
                       <i className="fas fa-users mr-2"></i>
-                      {program.participants.toLocaleString()} participants
+                      {project.participants} participants
                     </span>
                     <button
-                      onClick={() => setSelectedProgram(program)}
+                      onClick={() => setSelectedProject(project)}
                       className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
                     >
                       Join Project
@@ -231,36 +296,37 @@ const App: React.FC = () => {
         </button>
       )}
 
-      {selectedProgram && (
+      {selectedProject && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full relative">
             <h2 className="text-2xl font-bold mb-4 text-green-700">
-              {selectedProgram.title}
+              {selectedProject.project_name}
             </h2>
             <img
-              src={selectedProgram.imageUrl}
-              alt={selectedProgram.title}
+              src={selectedProject.imageUrl || 'https://public.readdy.ai/ai/img_res/a86a5d9bd78a933da2be1d249b523709.jpg'}
+              alt={selectedProject.project_name}
               className="w-full h-48 object-cover rounded-lg mb-4"
             />
             <p className="text-gray-600 mb-2">
-              <strong>Service Provider:</strong> {selectedProgram.provider}
+              <strong>Service Provider:</strong> {selectedProject.service_provider}
             </p>
             <p className="text-gray-600 mb-2">
-              <strong>Carbon Credits:</strong> {selectedProgram.carbonCredits}
+              <strong>Carbon Credits:</strong> {selectedProject.carbon_credits}
             </p>
             <p className="text-gray-600 mb-2">
-              <strong>Start Date:</strong> {selectedProgram.startDate}
+              <strong>Start Date:</strong> {formatStandardDate(selectedProject.start_date)}
             </p>
             <p className="text-gray-600 mb-4">
-              <strong>Completion Date:</strong> {selectedProgram.endDate}
+              <strong>Completion Date:</strong> {formatStandardDate(selectedProject.end_date)}
             </p>
             <button
+            onClick={() => handleJoinProject()}
               className="bg-green-600 text-white mb-3 px-4 py-2 rounded-lg w-full hover:bg-green-700"
             >
               Join Project
             </button>
             <button
-              onClick={() => setSelectedProgram(null)}
+              onClick={() => setSelectedProject(null)}
               className="bg-red-600 text-white px-4 py-2 rounded-lg w-full hover:bg-red-700"
             >
               Close
@@ -268,6 +334,23 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+
+       {/* Modal */}
+       {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+              <p className="text-center text-gray-800 mb-4">{message}</p>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 !rounded-button whitespace-nowrap"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+
     </div>
   );
 };

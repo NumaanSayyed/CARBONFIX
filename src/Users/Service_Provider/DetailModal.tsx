@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState , useEffect} from "react";
+import axios from "axios";
+import EditModal from "./EditModal";
 
 interface Program {
   id: number;
@@ -6,20 +8,35 @@ interface Program {
   category: string;
   credits: number;
   status: string;
+  start_date: string;
+  end_date: string;
+  remark: string
 }
 
 interface DetailModalProps {
   isOpen: boolean;
   program: Program | null;
   onClose: () => void;
+  onUpdate: (updatedProgram: Program) => void;
+  fetchProjects: () => void;
 }
 
 const DetailModal: React.FC<DetailModalProps> = ({
   isOpen,
   program,
   onClose,
+  onUpdate,
+  fetchProjects
 }) => {
   if (!isOpen || !program) return null;
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [updatedProgram, setUpdatedProgram] = useState(program);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+
+  useEffect(() => {
+    setUpdatedProgram(program);
+  }, [program]);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -37,6 +54,43 @@ const DetailModal: React.FC<DetailModalProps> = ({
         return "fa-leaf";
     }
   };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/serviceProviders/projects/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setModalMessage("Project deleted successfully!");
+      setIsModalOpen(true);
+      fetchProjects();
+      onClose(); // Close modal after deletion
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      setModalMessage("Failed to delete project.");
+      setIsModalOpen(true);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return date.toLocaleDateString("en-US", options);
+  };
+
+  const handleUpdate = (newData: Program) => {
+    setUpdatedProgram(newData);
+    fetchProjects();
+  };
+  
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
@@ -88,20 +142,45 @@ const DetailModal: React.FC<DetailModalProps> = ({
             <div className="relative pl-8 pb-8 border-l-2 border-green-200">
               <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-green-500"></div>
               <p className="text-sm text-gray-600">Project Started</p>
-              <p className="text-gray-800">March 1, 2025</p>
+              <p className="text-gray-800">{formatDate(program.start_date)}</p>
             </div>
 
             <div className="relative pl-8">
               <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-green-500"></div>
               <p className="text-sm text-gray-600">Estimated Completion</p>
-              <p className="text-gray-800">December 1, 2025</p>
+              <p className="text-gray-800">{formatDate(program.end_date)}</p>
             </div>
           </div>
 
-          {/* <button className="!rounded-button w-full bg-green-600 text-white py-3 flex items-center justify-center gap-2 hover:bg-green-700 transition-colors duration-300">
-                        <i className="fas fa-chart-line"></i>
-                        View Detailed Analytics
-                    </button> */}
+          {/* Delete Button */}
+          <button
+            onClick={() => program && handleDelete(program.id)}
+            className="w-full bg-red-700 text-white py-3 rounded-xl hover:bg-red-600 transition-all duration-300"
+          >
+            {/* <i className="fas fa-trash-alt mr-2"></i>  */}
+            Delete
+          </button>
+
+          <button
+            onClick={() => {
+              setTimeout(() => setIsEditOpen(true), 0); 
+            }}
+            className="w-full bg-green-700 text-white py-3 rounded-xl hover:bg-green-600 transition-all duration-300"
+          >
+            Edit
+          </button>
+
+          {/* Edit Modal */}
+          {isEditOpen && (
+            <EditModal
+            isOpen={isEditOpen}
+            program={updatedProgram} // Ensure it uses updated state
+            onClose={() => setIsEditOpen(false)}
+            onUpdate={handleUpdate}
+            />
+          )}
+
+          
         </div>
       </div>
     </div>

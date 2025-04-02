@@ -134,16 +134,8 @@ const Profile: React.FC = () => {
         }
     }, [projectStats]);
     return (
-        <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50'} transition-colors duration-300`}>
-            <button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="fixed top-4 right-4 p-2 rounded-full bg-opacity-80 backdrop-blur-sm transition-colors duration-300 z-50"
-                style={{
-                    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                }}
-            >
-                <i className={`fas ${isDarkMode ? 'fa-sun' : 'fa-moon'} text-xl ${isDarkMode ? 'text-yellow-400' : 'text-gray-600'}`}></i>
-            </button>
+        <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50'} transition-colors duration-300 pt-8`}>
+           
             <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12`}>
                 <div className={`${isDarkMode ? 'bg-gray-800/90' : 'bg-white/90'} rounded-xl backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] overflow-hidden transition-colors duration-300 border border-opacity-20 ${isDarkMode ? 'border-white' : 'border-gray-200'}`}>
                     <div className="relative h-48 md:h-64 bg-cover bg-center"
