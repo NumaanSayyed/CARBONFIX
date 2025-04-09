@@ -13,7 +13,8 @@ const Header: React.FC<EnrolledParticipantsHeaderProps> = ({
         <header className="bg-white  shadow-lg relative ">
             <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
                 {/* Back Button */}
-                <button className="flex items-center text-gray-600 hover:text-gray-900 transition-colors !rounded-button">
+                <button className="flex items-center text-gray-600 hover:text-gray-900 transition-colors !rounded-button"
+                onClick={() => window.history.back()}>
                     <i className="fas fa-arrow-left mr-2"></i>
                     Back to Dashboard
                 </button>

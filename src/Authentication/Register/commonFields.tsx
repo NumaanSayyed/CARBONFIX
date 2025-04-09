@@ -10,11 +10,13 @@ interface CommonFieldsProps {
     confirmPassword: string;
   };
   setFormData: React.Dispatch<React.SetStateAction<any>>;
+  userRole : String
 }
 
 const CommonFields: React.FC<CommonFieldsProps> = ({
   formData,
   setFormData,
+  userRole,
 }) => {
   const [passwordMatch, setPasswordMatch] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -65,7 +67,10 @@ const CommonFields: React.FC<CommonFieldsProps> = ({
       </div>
 
       {/* Email & Phone Fields */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className={`grid 
+      ${userRole == "admin" ?' md:grid-cols'  :'md:grid-cols-2  '}
+      
+      gap-6`}>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Email
@@ -78,7 +83,11 @@ const CommonFields: React.FC<CommonFieldsProps> = ({
             onChange={handleInputChange}
           />
         </div>
-        <div>
+       {
+        userRole == "admin" ? (
+          <div></div>
+        ) : (
+          <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Mobile Number
           </label>
@@ -90,6 +99,9 @@ const CommonFields: React.FC<CommonFieldsProps> = ({
             onChange={handleInputChange}
           />
         </div>
+        )
+       }
+       
       </div>
 
       {/* Password Field */}

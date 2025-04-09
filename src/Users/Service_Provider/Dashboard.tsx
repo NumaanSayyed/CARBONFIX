@@ -29,14 +29,14 @@ const Dashboard: React.FC = () => {
 
   const fetchProjects = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getWithExpirationCheck("token");
       if (!token) {
         console.error("Unauthorized! No token found.");
         return;
       }
 
       const response = await axios.get(
-        "http://localhost:5000/serviceProviders/projects",
+        "https://carbonfix-backend-5y3e.onrender.com/serviceProviders/projects",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -76,10 +76,25 @@ const Dashboard: React.FC = () => {
   const [completionDate, setCompletionDate] = useState("");
   const [modalMessage, setModalMessage] = useState("");
 
+  const getWithExpirationCheck = (key: string) => {
+    const dataString = localStorage.getItem(key);
+    if (!dataString) return null;
+  
+    const data = JSON.parse(dataString);
+    const currentTime = new Date().getTime();
+  
+    if (currentTime > data.expirationTime) {
+      localStorage.removeItem(key); // Remove expired item
+      return null; // Item expired
+    }
+  
+    return data.value; // Item is still valid
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("token");
+    const token = getWithExpirationCheck("token");
     if (!token) {
       setModalMessage("Unauthorized! Please log in again.");
       setIsModalOpen(true);
@@ -96,8 +111,9 @@ const Dashboard: React.FC = () => {
     };
 
     try {
+      // @ts-ignore
       const response = await axios.post(
-        "http://localhost:5000/serviceProviders/addProject",
+        "https://carbonfix-backend-5y3e.onrender.com/serviceProviders/addProject",
         requestData,
         {
           headers: {
@@ -116,9 +132,10 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // @ts-ignore
   const handleUpdate = async (updatedProgram: any) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getWithExpirationCheck("token");
       if (!token) {
         console.error("Unauthorized! No token found.");
         return;
@@ -126,7 +143,7 @@ const Dashboard: React.FC = () => {
 
       // Fetch updated project from the backend
       const response = await axios.get(
-        "http://localhost:5000/serviceProviders/projects",
+        "https://carbonfix-backend-5y3e.onrender.com/serviceProviders/projects",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -149,13 +166,14 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // @ts-ignore
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(
-        `http://localhost:5000/serviceProviders/projects/${id}`,
+        `https://carbonfix-backend-5y3e.onrender.com/serviceProviders/projects/${id}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${getWithExpirationCheck("token")}`,
           },
         }
       );

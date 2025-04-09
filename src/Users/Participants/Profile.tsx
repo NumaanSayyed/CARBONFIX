@@ -13,6 +13,7 @@ const Profile: React.FC = () => {
     const [ , setShowTooltip] = useState(false);
     const [badgeAnimation, setBadgeAnimation] = useState(false);
     const [ , setPreviousBadgeType] = useState('');
+    // @ts-ignore
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showLevelUpModal, setShowLevelUpModal] = useState(false);
     const [isMobile, setIsMobile] = useState(false);

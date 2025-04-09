@@ -9,7 +9,7 @@ interface Student {
     project: string;
     enrollmentDate: string;
     carbonPoints: number;
-    status: "Completed" | "WIP";
+    project_enroll_status: "Completed" | "WIP";
   }[];
   email: string;
 }
@@ -33,13 +33,13 @@ const StudentList: React.FC = () => {
             project: "Forestation",
             enrollmentDate: "2025-02-28",
             carbonPoints: 200,
-            status: "Completed",
+            project_enroll_status: "Completed",
           },
           {
             project: "Water Conservation",
             enrollmentDate: "2025-03-10",
             carbonPoints: 150,
-            status: "WIP",
+            project_enroll_status: "WIP",
           },
         ],
         email: "emily@example.com",
@@ -54,7 +54,7 @@ const StudentList: React.FC = () => {
             project: "Water Conservation",
             enrollmentDate: "2025-03-01",
             carbonPoints: 150,
-            status: "WIP",
+            project_enroll_status: "WIP",
           },
         ],
         email: "michael@example.com",
@@ -69,13 +69,13 @@ const StudentList: React.FC = () => {
             project: "Soil Restoration",
             enrollmentDate: "2025-03-03",
             carbonPoints: 80,
-            status: "WIP",
+            project_enroll_status: "WIP",
           },
           {
             project: "Wind Energy Initiative",
             enrollmentDate: "2025-03-07",
             carbonPoints: 120,
-            status: "Completed",
+            project_enroll_status: "Completed",
           },
         ],
         email: "sarah@example.com",
@@ -90,7 +90,7 @@ const StudentList: React.FC = () => {
             project: "Solar Energy Initiative",
             enrollmentDate: "2025-03-05",
             carbonPoints: 300,
-            status: "Completed",
+            project_enroll_status: "Completed",
           },
         ],
         email: "david@example.com",
@@ -197,12 +197,12 @@ const StudentList: React.FC = () => {
                               <p>
                                 <span
                                   className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                    enrollment.status === "Completed"
+                                    enrollment.project_enroll_status === "Completed"
                                       ? "bg-green-100 text-green-700"
                                       : "bg-red-100 text-red-700"
                                   }`}
                                 >
-                                  {enrollment.status}
+                                  {enrollment.project_enroll_status}
                                 </span>
                               </p>
 

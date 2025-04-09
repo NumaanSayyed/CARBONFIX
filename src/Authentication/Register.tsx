@@ -3,6 +3,7 @@ import CommonFields from "./Register/commonFields";
 import ParticipantForm from "./Register/participants";
 import CollegeForm from "./Register/college";
 import ServiceProviderForm from "./Register/serviceProvider";
+// import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 interface FormData {
@@ -59,7 +60,16 @@ const roles = [
     bgImage:
       "https://public.readdy.ai/ai/img_res/ef2d258638c75e806ecee1043adf2c5b.jpg",
   },
+  {
+    id: "admin",
+    title: "Admin",
+    icon: "fa-building",
+    description: "Register as a admin",
+    bgImage:
+      "https://public.readdy.ai/ai/img_res/ef2d258638c75e806ecee1043adf2c5b.jpg",
+  },
 ];
+
 
 const Register: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string>("");
@@ -86,6 +96,9 @@ const Register: React.FC = () => {
   const [validation, setValidation] = useState<FormValidation>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+
+  
+// const navigate = useNavigate();
 
   const validateField = (name: string, value: string) => {
     const newValidation = { ...validation };
@@ -114,10 +127,14 @@ const Register: React.FC = () => {
         );
         break;
       case "phone":
-        setValidationState(
-          /^\+?[\d\s-]{10,}$/.test(value),
-          "Please enter a valid phone number"
-        );
+        if(selectedRole !== "admin"){
+          setValidationState(
+            /^\+?[\d\s-]{10,}$/.test(value),
+            "Please enter a valid phone number"
+          );
+        }else {
+          setValidationState(true, "");
+        }
         break;
       default:
         setValidationState(value.length > 0, "This field is required");
@@ -134,9 +151,12 @@ const Register: React.FC = () => {
       "email",
       "password",
       "first_name",
-      "last_name",
-      "phone",
+      "last_name"
     ];
+
+    if(selectedRole !== "admin"){
+      requiredFields.push("phone");
+    }
 
     requiredFields.forEach((field) => {
       if (!formData[field as keyof FormData]) {
@@ -153,11 +173,13 @@ const Register: React.FC = () => {
 
     let endpoint = "";
     if (selectedRole === "participant") {
-      endpoint = "http://localhost:5000/participants/register";
+      endpoint = "https://carbonfix-backend-5y3e.onrender.com/participants/register";
     } else if (selectedRole === "college") {
-      endpoint = "http://localhost:5000/colleges/register";
+      endpoint = "https://carbonfix-backend-5y3e.onrender.com/colleges/register";
     } else if (selectedRole === "provider") {
-      endpoint = "http://localhost:5000/serviceProviders/register";
+      endpoint = "https://carbonfix-backend-5y3e.onrender.com/serviceProviders/register";
+    } else if(selectedRole == "admin") {
+      endpoint = "https://carbonfix-backend-5y3e.onrender.com/admin/register"
     }
 
     const { confirmPassword, ...filteredFormData } = formData;
@@ -176,17 +198,41 @@ const Register: React.FC = () => {
       setModalMessage("Account created successfully! Redirecting...");
       setIsModalOpen(true);
 
-      if (selectedRole === "participant") {
-        window.location.href = "/profile";
-      } else if (selectedRole === "provider") {
-        window.location.href = "/dashboard/service_provider";
-      }
+      const storeWithExpiration = (key: string, value: any, expirationDays: number) => {
+        const expirationTime = new Date().getTime() + expirationDays * 24 * 60 * 60 * 1000; // Calculate expiration timestamp (in milliseconds)
+        const data = {
+          value,
+          expirationTime,
+        };
+        localStorage.setItem(key, JSON.stringify(data)); // Store both the value and the expiration time
+      };
 
       if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("userType", selectedRole);
-        localStorage.setItem("user", JSON.stringify(response.data));
+        storeWithExpiration("token", response.data.token,7);
+        // localStorage.setItem("userType", selectedRole);
+        // localStorage.setItem("user", JSON.stringify(response.data));
       }
+
+      if (selectedRole === "participant") {
+        storeWithExpiration("userType","Participant",7);
+        storeWithExpiration("user", JSON.stringify(response.data.participant),7);
+        console.log("regiered and now navigating to profile");
+        window.location.href = "/profile";
+        // navigate("/profile");
+
+      } else if (selectedRole === "provider") {
+        storeWithExpiration("userType", "Service Provider",7);
+        storeWithExpiration("user", JSON.stringify(response.data.serviceProvider),7);
+        window.location.href = "/dashboard/service_provider";
+        //  navigate("/dashboard/service_provider");
+      } else if(selectedRole == "admin") {
+        storeWithExpiration("userType", "admin",7);
+        // storeWithExpiration("user", JSON.stringify(response.data.admin),7);
+        // storeWithExpiration("userToken",response.data.token,7);
+        // navigate("/admin");
+        window.location.href = "/admin";
+      }
+
     } catch (error: any) {
       if (error.response) {
         setModalMessage(
@@ -211,7 +257,7 @@ const Register: React.FC = () => {
           Create Your Account
         </h1>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid md:grid-cols-4 gap-6 mb-12">
           {roles.map((role) => (
             <div
               key={role.id}
@@ -244,7 +290,7 @@ const Register: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Wrap each form section inside a div with space-y-6 */}
             <div className="space-y-6">
-              <CommonFields formData={formData} setFormData={setFormData} />
+              <CommonFields formData={formData} userRole={selectedRole} setFormData={setFormData} />
 
               {selectedRole === "participant" && (
                 <ParticipantForm

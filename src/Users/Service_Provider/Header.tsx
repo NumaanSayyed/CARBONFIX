@@ -7,10 +7,47 @@ const Header: React.FC = () => {
   const chartRef = useRef<HTMLDivElement>(null);
   const [serviceProvider, setServiceProvider] = useState<any>(null);
   //Func to extract email from token
+
+  const getWithExpirationCheck = (key: string) => {
+    const dataString = localStorage.getItem(key);
+    if (!dataString) return null;
+  
+    const data = JSON.parse(dataString);
+    const currentTime = new Date().getTime();
+  
+    if (currentTime > data.expirationTime) {
+      localStorage.removeItem(key); // Remove expired item
+      return null; // Item expired
+    }
+  
+    return data.value; // Item is still valid
+  };
+
   const getEmailFromToken = () => {
     try {
-      const token = localStorage.getItem("token");
+      // const getWithExpirationCheck = (key: string) => {
+      //   const dataString = localStorage.getItem(key);
+      //   if (!dataString) return null;
+      
+      //   const data = JSON.parse(dataString);
+      //   const currentTime = new Date().getTime();
+      
+      //   if (currentTime > data.expirationTime) {
+      //     localStorage.removeItem(key); // Remove expired item
+      //     return null; // Item expired
+      //   }
+      
+      //   return data.value; // Item is still valid
+      // };
+
+      // const user = getWithExpirationCheck("user");
+
+const token = getWithExpirationCheck("token");
+
+
+      // const token = localStorage.getItem("token");
       if (!token) return null;
+      console.log("bekaar ye dil tera",token);
 
       const decoded: any = jwtDecode(token);
       return decoded.email || null;
@@ -23,7 +60,7 @@ const Header: React.FC = () => {
   //Fetch Service Provider Details
   useEffect(() => {
     const fetchServiceProviderDetails = async () => {
-      const token = localStorage.getItem("token");
+      const token = getWithExpirationCheck("token");
       const email = getEmailFromToken();
 
       if (!token || !email) {
@@ -33,7 +70,7 @@ const Header: React.FC = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:5000/serviceProviders/details/${email}`,
+          `https://carbonfix-backend-5y3e.onrender.com/serviceProviders/details/${email}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

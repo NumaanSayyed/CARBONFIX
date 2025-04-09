@@ -7,6 +7,7 @@ const App: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedProject, setSelectedProject] = useState<any>(null);
+  // @ts-ignore
   const [isJoining, setIsJoining] = useState<boolean>(false);
   const [message, setMessage] = useState<string | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
@@ -21,10 +22,25 @@ const App: React.FC = () => {
     { name: "Animal", icon: "fa-paw" },
   ];
 
+  const getWithExpirationCheck = (key: string) => {
+    const dataString = localStorage.getItem(key);
+    if (!dataString) return null;
+  
+    const data = JSON.parse(dataString);
+    const currentTime = new Date().getTime();
+  
+    if (currentTime > data.expirationTime) {
+      localStorage.removeItem(key); // Remove expired item
+      return null; // Item expired
+    }
+  
+    return data.value; // Item is still valid
+  };
+
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/serviceProviders/allProjects");
+        const response = await axios.get("https://carbonfix-backend-5y3e.onrender.com/serviceProviders/allProjects");
         setProjects(response.data.projects);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -36,7 +52,7 @@ const App: React.FC = () => {
   const handleJoinProject = async () => {
     try {
       //user data from localStorage
-      const storedUser = localStorage.getItem("user");
+      const storedUser = getWithExpirationCheck("user");
   
       if (!storedUser) {
         setMessage("User not logged in.");
@@ -45,7 +61,7 @@ const App: React.FC = () => {
       }
       // Parse JSON and extract participant ID
       const userData = JSON.parse(storedUser);
-      const participantId = userData?.participant?.id;
+      const participantId = userData.id;
   
       if (!participantId || !selectedProject?.id) {
         setMessage("Missing participant or project details.");
@@ -56,7 +72,7 @@ const App: React.FC = () => {
       setIsJoining(true);
       console.log("API Request: Joining project", selectedProject.id);
       // Send API request
-      const response = await axios.post("http://localhost:5000/enroll/request", {
+      const response = await axios.post("https://carbonfix-backend-5y3e.onrender.com/enroll/request", {
         participant_id: participantId,
         project_id: selectedProject.id,
       });

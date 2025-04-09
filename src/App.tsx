@@ -46,7 +46,7 @@ function App() {
 
         {/* Service Provider Routes */}
         <Route path="/dashboard/service_provider" element={<ServiceProviderDashboard />} />
-        <Route path="/dashboard/participant_manage" element={<EnrolledParticipant />} />
+        <Route path="/dashboard/participant_manage/:projectId" element={<EnrolledParticipant />} />
 
         {/* College Routes */}
         <Route path="/dashboard/college" element={<CollegeDashboard />} />

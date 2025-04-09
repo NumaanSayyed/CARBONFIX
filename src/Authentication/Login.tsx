@@ -1,8 +1,10 @@
 // The exported code uses Tailwind CSS. Install Tailwind CSS in your dev environment to ensure all styles work.
 
-import React, { useState } from "react";
-import { Link } from "react-router";
+import { useState} from "react";
+import { Link , useNavigate } from "react-router-dom";
 import axios from "axios";
+// import { useNavigate } from "react-router";
+
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -17,19 +19,25 @@ const Login: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
 
+  const navigate = useNavigate();  
+
 
   const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
   setLoading(true);
 
+  // const navigate = useNavigate();
+
   //API endpoint based on user type
   let endpoint = "";
   if (userType === "Participant") {
-    endpoint = "http://localhost:5000/participants/login";
+    endpoint = "https://carbonfix-backend-5y3e.onrender.com/participants/login";
   } else if (userType === "Service Provider") {
-    endpoint = "http://localhost:5000/serviceProviders/login";
+    endpoint = "https://carbonfix-backend-5y3e.onrender.com/serviceProviders/login";
   } else if (userType === "College") {
-    endpoint = "http://localhost:5000/colleges/login";
+    endpoint = "https://carbonfix-backend-5y3e.onrender.com/colleges/login";
+  } else if(userType === "admin") {
+    endpoint = "https://carbonfix-backend-5y3e.onrender.com/admin/login";
   }
 
   try {
@@ -42,17 +50,33 @@ const Login: React.FC = () => {
       }
     );
 
+    const storeWithExpiration = (key: string, value: any, expirationDays: number) => {
+      const expirationTime = new Date().getTime() + expirationDays * 24 * 60 * 60 * 1000; // Calculate expiration timestamp (in milliseconds)
+      const data = {
+        value,
+        expirationTime,
+      };
+      localStorage.setItem(key, JSON.stringify(data)); // Store both the value and the expiration time
+    };
+
     if (response.data.token) {
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("userType",userType);
-      localStorage.setItem('user', JSON.stringify(response.data));
+      storeWithExpiration("token", response.data.token,7);
+      storeWithExpiration("userType",userType,7);
+      // localStorage.setItem('user', JSON.stringify(response.data));
       
     }    
     // redirect after successfull login
     if(userType === 'Participant'){
       window.location.href = '/profile';
+      storeWithExpiration('user', JSON.stringify(response.data.participant),7);
+      navigate("/login");
     }else if(userType === 'Service Provider'){
       window.location.href = '/dashboard/service_provider';
+      // navigate("/dashboard/service_provider");
+      storeWithExpiration('user', JSON.stringify(response.data.serviceProvider),7);
+      navigate("/dashboard/service_provider");
+    }else if(userType === "admin"){
+      window.location.href = '/admin';
     }
 
   } catch (error: any) {
@@ -127,6 +151,7 @@ const Login: React.FC = () => {
                 <option value="Participant">Participant</option>
                 <option value="Service Provider">Service Provider</option>
                 <option value="College">College</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
 

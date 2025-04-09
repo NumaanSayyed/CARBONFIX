@@ -1,6 +1,7 @@
 import React, { useState , useEffect} from "react";
 import axios from "axios";
 import EditModal from "./EditModal";
+import { useNavigate } from "react-router-dom";
 
 interface Program {
   id: number;
@@ -25,13 +26,16 @@ const DetailModal: React.FC<DetailModalProps> = ({
   isOpen,
   program,
   onClose,
+  // @ts-ignore
   onUpdate,
   fetchProjects
 }) => {
   if (!isOpen || !program) return null;
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [updatedProgram, setUpdatedProgram] = useState(program);
+  // @ts-ignore
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // @ts-ignore
   const [modalMessage, setModalMessage] = useState("");
 
   useEffect(() => {
@@ -54,14 +58,28 @@ const DetailModal: React.FC<DetailModalProps> = ({
         return "fa-leaf";
     }
   };
+  const getWithExpirationCheck = (key: string) => {
+    const dataString = localStorage.getItem(key);
+    if (!dataString) return null;
+  
+    const data = JSON.parse(dataString);
+    const currentTime = new Date().getTime();
+  
+    if (currentTime > data.expirationTime) {
+      localStorage.removeItem(key); // Remove expired item
+      return null; // Item expired
+    }
+  
+    return data.value; // Item is still valid
+  };
 
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(
-        `http://localhost:5000/serviceProviders/projects/${id}`,
+        `https://carbonfix-backend-5y3e.onrender.com/serviceProviders/projects/${id}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${getWithExpirationCheck("token")}`,
           },
         }
       );
@@ -91,6 +109,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
     fetchProjects();
   };
   
+  const navigate = useNavigate();
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
@@ -152,15 +171,6 @@ const DetailModal: React.FC<DetailModalProps> = ({
             </div>
           </div>
 
-          {/* Delete Button */}
-          <button
-            onClick={() => program && handleDelete(program.id)}
-            className="w-full bg-red-700 text-white py-3 rounded-xl hover:bg-red-600 transition-all duration-300"
-          >
-            {/* <i className="fas fa-trash-alt mr-2"></i>  */}
-            Delete
-          </button>
-
           <button
             onClick={() => {
               setTimeout(() => setIsEditOpen(true), 0); 
@@ -168,6 +178,25 @@ const DetailModal: React.FC<DetailModalProps> = ({
             className="w-full bg-green-700 text-white py-3 rounded-xl hover:bg-green-600 transition-all duration-300"
           >
             Edit
+          </button>
+
+          
+          {/* See particvipants */} 
+          <button
+      onClick={() => navigate(`/dashboard/participant_manage/${program.id}`)}
+      // onClick={() => console.log()}
+      className="w-full bg-blue-700 text-white py-3 rounded-xl hover:bg-blue-600 transition-all duration-300"
+    >
+      View Participants
+    </button>
+
+     {/* Delete Button */}
+     <button
+            onClick={() => program && handleDelete(program.id)}
+            className="w-full bg-red-700 text-white py-3 rounded-xl hover:bg-red-600 transition-all duration-300"
+          >
+            {/* <i className="fas fa-trash-alt mr-2"></i>  */}
+            Delete
           </button>
 
           {/* Edit Modal */}
