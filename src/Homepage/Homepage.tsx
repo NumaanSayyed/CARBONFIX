@@ -14,10 +14,10 @@ const Homepage: React.FC = () => {
     const [carbonCredits, setCarbonCredits] = useState(0);
 
     useEffect(() => {
-        const targetCarbon = 15789;
-        const targetTrees = 42356;
-        const targetParticipants = 8934;
-        const targetCarbonCredits = 6290;
+        const targetCarbon = 0;
+        const targetTrees = 0;
+        const targetParticipants = 0;
+        const targetCarbonCredits = 0;
 
         const duration = 2000;
         const steps = 50;
