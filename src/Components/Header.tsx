@@ -440,7 +440,7 @@
 // export default Header;
 
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation ,useNavigate} from "react-router-dom";
 import axios from "axios";
 
 interface HeaderProps {
@@ -460,6 +460,8 @@ const Header: React.FC<HeaderProps> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [profileRoute, setProfileRoute] = useState("/profile");
 
+  const navigate = useNavigate();
+
   function handleLogout() {
     // Remove all relevant localStorage data
     localStorage.clear();
@@ -467,7 +469,8 @@ const Header: React.FC<HeaderProps> = ({
     setActiveNav("projects");   // Reset the active navigation to "projects"
 
     // Redirect to login page
-    window.location.href = "/login";
+    // window.location.href = "/login";
+    navigate("/login");
   }
 
   useEffect(() => {

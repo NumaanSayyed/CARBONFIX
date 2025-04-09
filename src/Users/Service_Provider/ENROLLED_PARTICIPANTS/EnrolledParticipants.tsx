@@ -300,7 +300,7 @@ const EnrolledParticipants: React.FC = () => {
         const formattedParticipants: Participant[] = response.data.map((participant: any) => ({
           id: participant.id,
           name: `${participant.first_name} ${participant.last_name}`,
-          avatar: "https://randomuser.me/api/portraits/men/45.jpg", // Placeholder avatar
+          avatar: "https://api.dicebear.com/7.x/initials/svg?seed=John+Doe", // Placeholder avatar
           project_enroll_status: participant.project_enroll_status,
           serviceType: participant.project_name || "N/A",
           enrollmentDate: participant.created_at,

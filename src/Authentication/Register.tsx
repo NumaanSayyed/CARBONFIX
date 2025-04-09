@@ -5,6 +5,7 @@ import CollegeForm from "./Register/college";
 import ServiceProviderForm from "./Register/serviceProvider";
 // import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface FormData {
   email: string;
@@ -66,7 +67,8 @@ const roles = [
     icon: "fa-building",
     description: "Register as a admin",
     bgImage:
-      "https://public.readdy.ai/ai/img_res/ef2d258638c75e806ecee1043adf2c5b.jpg",
+      // "https://public.readdy.ai/ai/img_res/ef2d258638c75e806ecee1043adf2c5b.jpg",
+      "https://images.unsplash.com/photo-1556157382-97eda2d62296?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"
   },
 ];
 
@@ -98,7 +100,7 @@ const Register: React.FC = () => {
   const [modalMessage, setModalMessage] = useState("");
 
   
-// const navigate = useNavigate();
+const navigate = useNavigate();
 
   const validateField = (name: string, value: string) => {
     const newValidation = { ...validation };
@@ -217,20 +219,20 @@ const Register: React.FC = () => {
         storeWithExpiration("userType","Participant",7);
         storeWithExpiration("user", JSON.stringify(response.data.participant),7);
         console.log("regiered and now navigating to profile");
-        window.location.href = "/profile";
-        // navigate("/profile");
+        // window.location.href = "/profile";
+        navigate("/profile");
 
       } else if (selectedRole === "provider") {
         storeWithExpiration("userType", "Service Provider",7);
         storeWithExpiration("user", JSON.stringify(response.data.serviceProvider),7);
-        window.location.href = "/dashboard/service_provider";
-        //  navigate("/dashboard/service_provider");
+        // window.location.href = "/dashboard/service_provider";
+         navigate("/dashboard/service_provider");
       } else if(selectedRole == "admin") {
         storeWithExpiration("userType", "admin",7);
         // storeWithExpiration("user", JSON.stringify(response.data.admin),7);
         // storeWithExpiration("userToken",response.data.token,7);
-        // navigate("/admin");
-        window.location.href = "/admin";
+        navigate("/admin");
+        // window.location.href = "/admin";
       }
 
     } catch (error: any) {
