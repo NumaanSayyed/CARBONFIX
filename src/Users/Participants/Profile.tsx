@@ -7,6 +7,7 @@ import { Pagination, Autoplay } from 'swiper/modules';
 import axios from "axios";
 import "swiper/swiper-bundle.css";
 import { backend_url } from '../../backend_route';
+import { useNavigate } from 'react-router-dom';
 
 const swiperModules = [Pagination, Autoplay];
 const Profile: React.FC = () => {
@@ -22,13 +23,15 @@ const Profile: React.FC = () => {
     const [projectStats,  setprojectstats] = useState({
         enrolled: 0,
         completed: 0,
-        pending: 0
+        pending: 0,
+        completion_rate : 0,
     });
     const [name, setName] = useState();
+    const[lastname,setLastname] = useState();
      // @ts-ignore
 const [title, setTitle] = useState("Environmental Sustainability Lead");
 
-
+const navigate = useNavigate();
     const chartRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const handleResize = () => {
@@ -95,21 +98,16 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
         } else {
             setCredits(newCredits);
         }
-    };
-
-    
+    };    
   const getWithExpirationCheck = (key: string) => {
     const dataString = localStorage.getItem(key);
     if (!dataString) return null;
-
     const data = JSON.parse(dataString);
     const currentTime = new Date().getTime();
-
     if (currentTime > data.expirationTime) {
       localStorage.removeItem(key);
       return null;
     }
-
     return data.value;
   };
 
@@ -135,6 +133,7 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
       } = res.data;
   
       if (participant.first_name) setName(participant.first_name);
+      if(participant.last_name) setLastname(participant.last_name);
       if (participant.title) setTitle(participant.title);
       if (total_credits) setCredits(total_credits);
   
@@ -143,6 +142,7 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
         enrolled: total_enrolled_projects,
         completed: total_completed_projects,
         pending: total_pending_projects,
+        completion_rate:completion_rate
       });
   
       // Log or use the completion rate
@@ -152,13 +152,10 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
     } catch (error) {
       console.error("Failed to fetch profile data:", error);
     }
-  };
-  
-  
+  };  
   useEffect(() => {
     fetchProfileData();
   }, []);
-
     useEffect(() => {
         if (chartRef.current) {
             const chart = echarts.init(chartRef.current);
@@ -173,41 +170,16 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
                         name: 'Project Status',
                         type: 'pie',
                         radius: ['60%', '80%'],
-                        avoidLabelOverlap: false,
-                        label: {
-                            show: false
-                        },
-                        emphasis: {
-                            label: {
-                                show: false
-                            }
-                        },
-                        labelLine: {
-                            show: false
-                        },
-                        data: [
-                            { value: projectStats.completed, name: 'Completed' },
-                            { value: projectStats.pending, name: 'Pending' },
-                            { value: projectStats.enrolled - (projectStats.completed + projectStats.pending), name: 'In Progress' }
-                        ]
-                    }
-                ]
-            };
-            chart.setOption(option);
-            const handleResize = () => {
+                        avoidLabelOverlap: false,  label: { show: false    },   emphasis: {   label: {
+                                show: false }  },         labelLine: { show: false   }, data: [
+                            { value: projectStats.completed, name: 'Completed' }, { value: projectStats.pending, name: 'Pending' },  { value: projectStats.enrolled - (projectStats.completed + projectStats.pending), name: 'In Progress' }]
+                    } ]   };    chart.setOption(option); const handleResize = () => {
                 chart.resize();
-            };
-            window.addEventListener('resize', handleResize);
-            return () => {
-                chart.dispose();
-                window.removeEventListener('resize', handleResize);
-            };
-        }
-    }, [projectStats]);
+            }; window.addEventListener('resize', handleResize);return () => {chart.dispose(); window.removeEventListener('resize', handleResize);
+            }; } }, [projectStats]);
     return (
         <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50'} transition-colors duration-300 pt-8`}>
-           
-            <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12`}>
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12`}>
                 <div className={`${isDarkMode ? 'bg-gray-800/90' : 'bg-white/90'} rounded-xl backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] overflow-hidden transition-colors duration-300 border border-opacity-20 ${isDarkMode ? 'border-white' : 'border-gray-200'}`}>
                     <div className="relative h-48 md:h-64 bg-cover bg-center"
                         style={{
@@ -222,11 +194,10 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
                                         <i className={`fas ${badgeInfo.icon} text-4xl md:text-5xl text-white drop-shadow-lg ${badgeAnimation ? 'animate-bounce' : ''}`}></i>
                                     </div>
                                     <div className="absolute -bottom-1 left-0 right-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent"></div>
-                                </div>
-                            </div>
+                                </div>  </div>
                             <div className="text-center md:text-left text-white">
                                 <div className="flex flex-col md:flex-row items-center md:space-x-4">
-                                    <h1 className="text-2xl md:text-3xl font-bold">{name}</h1>
+                                    <h1 className="text-2xl md:text-3xl font-bold">{name} {lastname}</h1>
                                     <div
                                         className={`mt-2 md:mt-0 ${badgeInfo.color} px-6 py-2 rounded-full flex items-center space-x-3 transition-all duration-300 transform hover:scale-105 ${badgeAnimation ? 'animate-pulse shadow-lg shadow-current' : ''
                                             }`}
@@ -238,10 +209,7 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
                                         <span className="text-sm opacity-75">Level</span>
                                     </div>
                                 </div>
-                                <p className="text-gray-200 mt-2">Environmental Sustainability Lead</p>
-                            </div>
-                        </div>
-                    </div>
+                                <p className="text-gray-200 mt-2">Environmental Sustainability Lead</p>  </div> </div>    </div>
                     <div className="px-4 md:px-8 py-6">
                         {isMobile ? (
                             <Swiper
@@ -249,34 +217,39 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
                                 spaceBetween={20}
                                 slidesPerView={1.2}
                                 centeredSlides={true}
-                                pagination={{ clickable: true }}
-                                autoplay={{ delay: 3000 }}
-                                className="mb-8"
+                                pagination={{ clickable: false }}
+                                autoplay={{ delay: 3000 }} className="mb-8"
                             >
                                 <SwiperSlide>
-                                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6" onClick={addCredits}>
-                                      wdd//  <div className="text-4xl font-bold text-green-600 mb-2">90</div>
+                                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6" >
+                                      <div className="text-4xl font-bold text-green-600 mb-2">{credits}</div>
                                         <p className="text-gray-600">Total Carbon Credits</p>
                                     </div>
                                 </SwiperSlide>
                                 <SwiperSlide>
                                     <div className="bg-white/30 backdrop-blur-md rounded-xl p-6 shadow-[inset_-5px_-5px_10px_rgba(255,255,255,0.8),inset_5px_5px_10px_rgba(0,0,0,0.1)]">
-                                        <div className="text-4xl font-bold text-blue-600 mb-2">12</div>
+                                        <div className="text-4xl font-bold text-blue-600 mb-2">{projectStats.completed}</div>
                                         <p className="text-gray-600">Projects Contributed</p>
                                     </div>
                                 </SwiperSlide>
                                 <SwiperSlide>
                                     <div className="bg-white/30 backdrop-blur-md rounded-xl p-6 shadow-[inset_-5px_-5px_10px_rgba(255,255,255,0.8),inset_5px_5px_10px_rgba(0,0,0,0.1)]">
-                                        <div className="text-4xl font-bold text-purple-600 mb-2">89%</div>
+                                        <div className="text-4xl font-bold text-purple-600 mb-2">{projectStats.completion_rate}</div>
                                         <p className="text-gray-600">Sustainability Score</p>
+                                    </div>
+                                </SwiperSlide>
+                                <SwiperSlide>
+                                    <div className="bg-white/30 backdrop-blur-md rounded-xl p-6 shadow-[inset_-5px_-5px_10px_rgba(255,255,255,0.8),inset_5px_5px_10px_rgba(0,0,0,0.1)]" onClick={() => navigate("/participant/project")}>
+                                        <div className="text-4xl font-bold text-purple-600 mb-2"></div>
+                                        <p className="text-gray-600 text-3xl font-bold text-purple-600">My projects</p>
                                     </div>
                                 </SwiperSlide>
                             </Swiper>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                                 <div
                                     className="bg-gradient-to-br from-emerald-50 to-green-100 backdrop-blur-md rounded-xl p-6 cursor-pointer relative overflow-hidden group transition-all duration-300"
-                                    onClick={addCredits}
+                                    // onClick={addCredits}
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-500/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
                                     <div className="relative z-10">
@@ -285,19 +258,20 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
                                             <div className="text-lg text-green-600 font-medium">credits</div>
                                         </div>
                                         <p className="text-gray-600 mt-2 group-hover:text-green-700 transition-colors duration-300">Total Carbon Credits</p>
-                                    </div>
-                                    <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br from-green-200 to-emerald-300 rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                                    </div>  <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br from-green-200 to-emerald-300 rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
                                 </div>
                                 <div className="bg-white/30 backdrop-blur-md rounded-xl p-6 shadow-[inset_-5px_-5px_10px_rgba(255,255,255,0.8),inset_5px_5px_10px_rgba(0,0,0,0.1)]">
                                     <div className="text-4xl font-bold text-blue-600 mb-2">{projectStats.completed}</div>
                                     <p className="text-gray-600">Projects Contributed</p>
                                 </div>
                                 <div className="bg-white/30 backdrop-blur-md rounded-xl p-6 shadow-[inset_-5px_-5px_10px_rgba(255,255,255,0.8),inset_5px_5px_10px_rgba(0,0,0,0.1)]">
-                                    <div className="text-4xl font-bold text-purple-600 mb-2">89%</div>
+                                    <div className="text-4xl font-bold text-purple-600 mb-2">{projectStats.completion_rate}</div>
                                     <p className="text-gray-600">Sustainability Score</p>
                                 </div>
-                            </div>
-                        )}
+                               <div className="flex items-baseline space-x-2 p-6  shadow-[inset_-5px_-5px_10px_rgba(255,255,255,0.8),inset_5px_5px_10px_rgba(0,0,0,0.1)]" onClick={() => navigate("/participant/project")}>
+                                            {/* <div className="text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent animate-pulse">{credits}</div> */}
+                                            <div className="text-3xl font-bold text-purple-600">My Projects</div>
+                                        </div> </div>  )}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-6">
                                 <div className="bg-white/40 backdrop-blur-md rounded-lg p-5 shadow-[5px_5px_15px_rgba(0,0,0,0.1),-5px_-5px_15px_rgba(255,255,255,0.8)] transition-all duration-300">
@@ -307,16 +281,13 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
                                             <i className="fas fa-sync-alt"></i>
                                         </button>
                                     </div>
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center">
+                                    <div className="space-y-4"> <div className="flex justify-between items-center">
                                             <span className="text-gray-600">Enrolled Projects</span>
                                             <span className="text-2xl font-bold text-emerald-600">{projectStats.enrolled}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
+                                        </div> <div className="flex justify-between items-center">
                                             <span className="text-gray-600">Completed</span>
                                             <span className="text-2xl font-bold text-indigo-600">{projectStats.completed}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
+                                        </div> <div className="flex justify-between items-center">
                                             <span className="text-gray-600">Pending</span>
                                             <span className="text-2xl font-bold text-gray-400">{projectStats.pending}</span>
                                         </div>
@@ -330,16 +301,10 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
                                                 style={{ width: `${(projectStats.completed / projectStats.enrolled) * 100}%` }}
                                                 className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500"
                                             ></div>
-                                        </div>
-                                        <div className="flex justify-between text-xs font-semibold">
-                                            <span className="text-indigo-600">Progress</span>
+                                        </div><div className="flex justify-between text-xs font-semibold"> <span className="text-indigo-600">Progress</span>
                                             <span className="text-indigo-600">
                                                 {Math.round((projectStats.completed / projectStats.enrolled) * 100)}%
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                            </span> </div> </div> </div>   </div>
                             <div className="bg-white/40 backdrop-blur-md rounded-lg p-5 shadow-[5px_5px_15px_rgba(0,0,0,0.1),-5px_-5px_15px_rgba(255,255,255,0.8)] transition-all duration-300">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Project Distribution</h3>
                                 <div ref={chartRef} className="w-full h-64"></div>
@@ -360,13 +325,7 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
                                     <div>
                                         <h3 className="font-semibold text-gray-800">Solar Energy Advocate</h3>
                                         <p className="text-gray-600 text-sm">Supported 5 community solar projects</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                    </div>  </div>    </div> </div> </div>      </div>-    </div>
             {showLevelUpModal && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
                     <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
@@ -380,14 +339,5 @@ const [title, setTitle] = useState("Environmental Sustainability Lead");
                             <button
                                 onClick={() => setShowLevelUpModal(false)}
                                 className="px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full hover:from-purple-600 hover:to-indigo-600 transition-all duration-300"
-                            >
-                                Continue
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
+                            > Continue </button>    </div>  </div>   </div>     )} </div>);};
 export default Profile;

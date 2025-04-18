@@ -958,13 +958,6 @@ const EnrolledParticipants: React.FC = () => {
   : true;
   
 
-      // const matchesDateRange = selectedFilters.dateRange
-      // ? formatDateOnly(participant.enrollmentDate) >= selectedFilters.dateRange
-      // : true;
-
-      //   console.log(formatDateOnly(participant.enrollmentDate));
-
-
       return matchesSearchTerm && matchesStatus && matchesServiceType && matchesLocation && matchesDateRange;
     });
   };
@@ -1013,7 +1006,7 @@ const EnrolledParticipants: React.FC = () => {
           project_enroll_status: participant.project_enroll_status,
           serviceType: participant.project_name || "N/A",
           enrollmentDate: participant.created_at,
-          location: participant.area || "NA",
+          location: participant.project_category || "NA",
           creditsEarned: participant.creditsEarned || undefined,
           creditsAllocated: participant.carbon_credits || undefined,
           email: participant.email || undefined,

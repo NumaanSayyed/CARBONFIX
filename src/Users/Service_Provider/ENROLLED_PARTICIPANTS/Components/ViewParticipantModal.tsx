@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { backend_url } from "../../../../backend_route";
+import {formatDate} from "../../../../Helpers/Helpers";
 
 interface Participant {
   id: string;
@@ -179,7 +180,7 @@ const ViewParticipantModal: React.FC<ViewParticipantModalProps> = ({
             <div>
               <p className="text-sm text-gray-500">Enrollment Date</p>
               <p className="text-sm font-medium text-gray-900">
-                {selectedParticipant.enrollmentDate}
+                {formatDate(selectedParticipant.enrollmentDate)}
               </p>
             </div>
             <div>
@@ -239,7 +240,7 @@ const ViewParticipantModal: React.FC<ViewParticipantModalProps> = ({
       console.log("proof id : ",proofData.proofId);
       handleSendToAdmin(proofData.proofId); // Only call if proofId is defined
     } else {
-      alert("Proof ID is missing");
+      alert("Proofs not found , submit the proof first!");
     }
   }}
   className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700"

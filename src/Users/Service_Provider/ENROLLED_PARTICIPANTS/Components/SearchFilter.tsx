@@ -243,7 +243,7 @@ const SearchFilter: React.FC<ParticipantSearchFilterProps> = ({
                 <option value="Service B">Service B</option>
                  */}
 
-<option value="Forestration">Forestration</option>
+<option value="Forestration">Forestation</option>
                 <option value="Water">Water</option>
                 <option value="Soil">Soil</option>
                 <option value="re-cycle">re-cycle</option>
@@ -261,7 +261,7 @@ const SearchFilter: React.FC<ParticipantSearchFilterProps> = ({
                 className="w-full py-2 px-3 border border-gray-300 rounded-lg"
               >
                 <option value="All">All</option>
-                <option value="Forestration">Forestration</option>
+                <option value="Forestration">Forestation</option>
                 <option value="Water">Water</option>
                 <option value="Soil">Soil</option>
                 <option value="re-cycle">re-cycle</option>

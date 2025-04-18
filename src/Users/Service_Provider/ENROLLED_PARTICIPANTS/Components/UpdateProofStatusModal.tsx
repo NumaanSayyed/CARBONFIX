@@ -624,39 +624,96 @@ const UpdateProofStatusModal: React.FC<UpdateProofStatusModalProps> = ({
       setIsModalOpen(true);
       return;
     }
-
+  
     const formData = new FormData();
     formData.append("participant_id", participantId);
     formData.append("project_id", projectId);
     formData.append("service_provider_id", serviceProviderId);
     formData.append("remark", updateFormData.remarks);
-
+  
     if (imageFile) formData.append("image", imageFile);
     if (imageURL) formData.append("image_url", imageURL);
     if (videoFile) formData.append("video", videoFile);
     if (videoURL) formData.append("video_url", videoURL);
-
+  
     try {
-      // @ts-ignore
-      const response = await axios.post(`${backend_url}/serviceProviders/submit`, formData, {
+      await axios.post(`${backend_url}/serviceProviders/submit`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${getWithExpirationCheck("token")}`, // Include token
+          Authorization: `Bearer ${getWithExpirationCheck("token")}`,
         },
       });
-
+  
       setShowUpdateModal(false);
+  
       const successDiv = document.createElement("div");
-      successDiv.className = "fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up";
+      successDiv.className =
+        "fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up";
       successDiv.textContent = "Proofs submitted successfully!";
       document.body.appendChild(successDiv);
       setTimeout(() => successDiv.remove(), 3000);
-    } catch (error : any) {
+  
+    } catch (error: any) {
       console.error("Error submitting proofs:", error);
+  
+      // ✅ Now check status code here
+      if (error.response?.status === 403) {
+        alert(error.response.data?.error || "Participant is not approved or not enrolled.");
+        return;
+      }
+  
       setModalMessage(error.response?.data?.error || "Failed to submit proofs. Please try again.");
       setIsModalOpen(true);
     }
   };
+  
+
+  // const handleUpdate = async () => {
+  //   if ((!imageFile && !imageURL) && (!videoFile && !videoURL)) {
+  //     setModalMessage("Please provide either a file or a URL for both image and video proofs.");
+  //     setIsModalOpen(true);
+  //     return;
+  //   }
+
+  //   const formData = new FormData();
+  //   formData.append("participant_id", participantId);
+  //   formData.append("project_id", projectId);
+  //   formData.append("service_provider_id", serviceProviderId);
+  //   formData.append("remark", updateFormData.remarks);
+
+  //   if (imageFile) formData.append("image", imageFile);
+  //   if (imageURL) formData.append("image_url", imageURL);
+  //   if (videoFile) formData.append("video", videoFile);
+  //   if (videoURL) formData.append("video_url", videoURL);
+
+  //   try {
+  //     // @ts-ignore
+  //     const response = await axios.post(`${backend_url}/serviceProviders/submit`, formData, {
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //         Authorization: `Bearer ${getWithExpirationCheck("token")}`, // Include token
+  //       },
+  //     });
+
+  //     if(response.status == 403){
+  //       alert("Participant is not approved or not enrolled");
+  //     }
+    
+
+  //     setShowUpdateModal(false);
+  //     const successDiv = document.createElement("div");
+  //     successDiv.className = "fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up";
+  //     successDiv.textContent = "Proofs submitted successfully!";
+  //     document.body.appendChild(successDiv);
+  //     setTimeout(() => successDiv.remove(), 3000);
+
+    
+  //   } catch (error : any) {
+  //     console.error("Error submitting proofs:", error);
+  //     setModalMessage(error.response?.data?.error || "Failed to submit proofs. Please try again.");
+  //     setIsModalOpen(true);
+  //   }
+  // };
 
   if (!showUpdateModal) return null;
 

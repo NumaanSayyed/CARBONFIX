@@ -41,10 +41,19 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
           <input
             type="date"
             name="dob"
+            max="2009-12-31" // Only dates before 2010 allowed
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={formData.dob}
             onChange={handleInputChange}
           />
+
+          {/* <input
+            type="date"
+            name="dob"
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={formData.dob}
+            onChange={handleInputChange}
+          /> */}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -12,7 +12,6 @@ const Dashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState<any>(null);
-  // const [programs, setPrograms] = useState([]);
   const [programs, setPrograms] = useState<
     {
       id: number;
@@ -123,6 +122,15 @@ const Dashboard: React.FC = () => {
           },
         }
       );
+
+         // ✅ Clear form fields
+    setSelectedCategory("");
+    setProgramName("");
+    setCarbonCredits("");
+    setStartDate("");
+    setCompletionDate("");
+    setRemarks("");
+
       setIsModalOpen(false)
 
       fetchProjects();
@@ -133,6 +141,22 @@ const Dashboard: React.FC = () => {
       setIsModalOpen(true);
     }
   };
+
+  const getTomorrowDate = () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    return tomorrow.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+  };
+
+  const getMinCompletionDate = () => {
+    if (!startDate) return ""; // No min if start date not selected
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + 1); // Next day after start
+    return date.toISOString().split("T")[0];
+  };
+  
+  
 
   // @ts-ignore
   const handleUpdate = async (updatedProgram: any) => {
@@ -267,10 +291,10 @@ const Dashboard: React.FC = () => {
                 required
               >
                 <option value="">Select Category</option>
-                <option value="Forestration">Forestration</option>
+                <option value="Forestration">Forestation</option>
                 <option value="Water">Water</option>
                 <option value="Soil">Soil</option>
-                <option value="re-cycle">re-cycle</option>
+                <option value="re-cycle">Re-Cycle</option>
                 <option value="Animal">Animal</option>
               </select>
             </div>
@@ -304,7 +328,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Program Start Date */}
-            <div>
+            {/* <div>
               <label className="block text-gray-700 mb-2 font-medium">
                 Project Start Date
               </label>
@@ -315,21 +339,38 @@ const Dashboard: React.FC = () => {
                 className="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200"
                 required
               />
-            </div>
+            </div> */}
 
-            {/* Estimated Completion Date */}
-            <div>
-              <label className="block text-gray-700 mb-2 font-medium">
-                Estimated Completion Date
-              </label>
-              <input
-                type="date"
-                value={completionDate}
-                onChange={(e) => setCompletionDate(e.target.value)}
-                className="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200"
-                required
-              />
-            </div>
+<div>
+  <label className="block text-gray-700 mb-2 font-medium">
+    Project Start Date
+  </label>
+  <input
+    type="date"
+    value={startDate}
+    min={getTomorrowDate()} // 👈 Only allow future dates
+    onChange={(e) => setStartDate(e.target.value)}
+    className="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200"
+    required
+  />
+</div>
+
+
+          {/* Estimated Completion Date */}
+<div>
+  <label className="block text-gray-700 mb-2 font-medium">
+    Estimated Completion Date
+  </label>
+  <input
+    type="date"
+    value={completionDate}
+    min={getMinCompletionDate()} // 👈 Restrict to after start date
+    onChange={(e) => setCompletionDate(e.target.value)}
+    className="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200"
+    required
+  />
+</div>
+
 
             {/* Remarks */}
             <div>

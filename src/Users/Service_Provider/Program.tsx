@@ -95,10 +95,10 @@ const Program: React.FC<ProgramsGridProps> = ({
   {/* <p className="text-2xl font-bold relative flex items-center gap-2 group-hover:scale-105 transition-transform duration-300"> */}
   <i className="fas fa-leaf text-green-500 group-hover:rotate-12 transition-transform duration-300"></i>
   <span className="screenshot-hide bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
-    {program.credits.toLocaleString()}
+    {program.credits}
   </span>
   <span className="screenshot-only hidden text-green-600">
-    {program.credits.toLocaleString()}
+    {program.credits}
   </span>
 </p>
 

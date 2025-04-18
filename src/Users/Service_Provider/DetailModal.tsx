@@ -21,6 +21,7 @@ interface DetailModalProps {
   onClose: () => void;
   onUpdate: (updatedProgram: Program) => void;
   fetchProjects: () => void;
+  
 }
 
 const DetailModal: React.FC<DetailModalProps> = ({
@@ -42,6 +43,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
 
   useEffect(() => {
     setUpdatedProgram(program);
+    console.log("program",program);
   }, [program]);
 
   const getCategoryIcon = (category: string) => {
@@ -106,10 +108,46 @@ const DetailModal: React.FC<DetailModalProps> = ({
     return date.toLocaleDateString("en-US", options);
   };
 
-  const handleUpdate = (newData: Program) => {
-    setUpdatedProgram(newData);
+  // const handleUpdate = (newData: Program) => {
+  //   if (Array.isArray(newData)) {
+  //     console.log("✅ Correctly received updated program:", newData[0]);
+  //     onUpdate(newData[0]);
+  //     console.log(newData[0].name);
+  //   } else {
+  //     console.log("✅ Correctly received updated program:", newData);
+  //     onUpdate(newData);
+  //   }
+  //   console.log(program);
+  //   setUpdatedProgram(newData);
+  //   fetchProjects();
+  // };
+
+  const handleUpdate = (newData: any) => {
+    console.log("📦 Raw newData:", newData);
+  
+    const updated =
+      Array.isArray(newData) && newData.length > 0 ? newData[0] : newData;
+  
+    const mappedProgram: Program = {
+      id: updated.id,
+      name: updated.project_name || "", // <- mapping from backend
+      category: updated.project_category || "",
+      credits: updated.carbon_credits || 0,
+      status: updated.status || "Active",
+      start_date: updated.start_date || "",
+      end_date: updated.end_date || "",
+      remark: updated.remark || "",
+    };
+  
+    console.log("✅ Mapped Program object:", mappedProgram);
+  
+    onUpdate(mappedProgram);
+    setUpdatedProgram(mappedProgram);
     fetchProjects();
   };
+  
+  
+  
   
   const navigate = useNavigate();
 
@@ -131,15 +169,15 @@ const DetailModal: React.FC<DetailModalProps> = ({
             <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center shadow-lg">
               <i
                 className={`fas ${getCategoryIcon(
-                  program.category
+                  updatedProgram.category
                 )} text-3xl text-green-600`}
               ></i>
             </div>
             <div>
               <h3 className="text-2xl [@media(max-width:770px)]:text-1xl font-bold text-gray-800">
-                {program.name}
+                {updatedProgram.name}
               </h3>
-              <p className="text-gray-600">{program.category}</p>
+              <p className="text-gray-600">{updatedProgram.category}</p>
             </div>
           </div>
 
@@ -147,13 +185,13 @@ const DetailModal: React.FC<DetailModalProps> = ({
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-1">Status</p>
               <p className="text-lg font-semibold text-gray-800">
-                {program.status}
+                {updatedProgram.status}
               </p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-1">Carbon Credits</p>
               <p className="text-lg font-semibold text-gray-800">
-                {program.credits.toLocaleString()}
+                {updatedProgram.credits}
               </p>
             </div>
           </div>
@@ -163,13 +201,13 @@ const DetailModal: React.FC<DetailModalProps> = ({
             <div className="relative pl-8 pb-8 border-l-2 border-green-200">
               <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-green-500"></div>
               <p className="text-sm text-gray-600">Project Started</p>
-              <p className="text-gray-800">{formatDate(program.start_date)}</p>
+              <p className="text-gray-800">{formatDate(updatedProgram.start_date.toLocaleString())}</p>
             </div>
 
             <div className="relative pl-8">
               <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-green-500"></div>
               <p className="text-sm text-gray-600">Estimated Completion</p>
-              <p className="text-gray-800">{formatDate(program.end_date)}</p>
+              <p className="text-gray-800">{formatDate(updatedProgram.end_date.toLocaleString())}</p>
             </div>
           </div>
 
@@ -185,7 +223,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
           
           {/* See particvipants */} 
           <button
-      onClick={() => navigate(`/dashboard/participant_manage/${program.id}`)}
+      onClick={() => navigate(`/dashboard/participant_manage/${updatedProgram.id}`)}
       // onClick={() => console.log()}
       className="w-full bg-blue-700 text-white py-3 rounded-xl hover:bg-blue-600 transition-all duration-300 [@media(max-width:770px)]:hidden"
     >
@@ -204,14 +242,14 @@ const DetailModal: React.FC<DetailModalProps> = ({
           </button>
       
     <button
-      onClick={() => navigate(`/dashboard/participant_manage/${program.id}`)}
+      onClick={() => navigate(`/dashboard/participant_manage/${updatedProgram.id}`)}
       // onClick={() => console.log()}
       className=" p-2 bg-blue-700 text-white py-3 rounded-xl hover:bg-blue-600 transition-all duration-300 "
     >
       View Participants
     </button>
     <button
-            onClick={() => program && handleDelete(program.id)}
+            onClick={() => program && handleDelete(updatedProgram.id)}
             className="p-2 bg-red-700 text-white py-3 rounded-xl hover:bg-red-600 transition-all duration-300 "
           >
             {/* <i className="fas fa-trash-alt mr-2"></i>  */}
@@ -241,6 +279,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
             program={updatedProgram} // Ensure it uses updated state
             onClose={() => setIsEditOpen(false)}
             onUpdate={handleUpdate}
+            fetchProjects={fetchProjects}
             />
           )}
 
