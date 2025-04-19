@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../Helpers/authContext";
+// @ts-ignore
 import axios from "axios";
+// @ts-ignore
 import { backend_url } from "../../../backend_route";
 
 interface FormData {
@@ -20,11 +22,15 @@ const RegisterPage: React.FC = () => {
     password: "",
     confirmPassword: "",
   });
-    const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
+  
+  // @ts-ignore 
+
   const { login, profileRoute } = useAuth();
 
+  // @ts-ignore
   const [validationMessages, setValidationMessages] = useState<{
     [key: string]: string;
   }>({
@@ -47,7 +53,6 @@ const RegisterPage: React.FC = () => {
     e.preventDefault();
 
     try {
-
       // Login immediately after successful registration
       const { email, password } = formData;
       const userType = "admin";
@@ -69,7 +74,7 @@ const RegisterPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-20 px-4">
       <div className="max-w-4xl mt-9 mx-auto bg-white rounded-xl shadow-lg p-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          Create Your Account
+          Create Admin Account
         </h1>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
@@ -100,45 +105,48 @@ const RegisterPage: React.FC = () => {
             </div>
 
             {/* Password */}
-           {/* Password */}
-<div>
-  <label
-    htmlFor="password"
-    className="block text-gray-700 font-semibold"
-  >
-    Password
-  </label>
-  <div className="relative">
-    <input
-      type={showPassword ? "text" : "password"}
-      name="password"
-      id="password"
-      value={formData.password}
-      onChange={handleChange}
-      required
-      className="appearance-none rounded-md relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-      placeholder="Password"
-    />
-    <span
-      onClick={() => setShowPassword(!showPassword)}
-      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer text-sm"
-    >
-      <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
-    </span>
-  </div>
-  {validationMessages.password && (
-    <p className="text-red-500 text-xs">
-      {validationMessages.password}
-    </p>
-  )}
-</div>
-
+            {/* Password */}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-gray-700 font-semibold"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  id="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="appearance-none rounded-md relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Password"
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer text-sm"
+                >
+                  <i
+                    className={`fas ${
+                      showPassword ? "fa-eye-slash" : "fa-eye"
+                    }`}
+                  ></i>
+                </span>
+              </div>
+              {validationMessages.password && (
+                <p className="text-red-500 text-xs">
+                  {validationMessages.password}
+                </p>
+              )}
+            </div>
           </div>
 
           <div>
             <button
               type="submit"
-              className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 bg-emerald-500 hover:bg-emerald-600"
+              className="w-full mt-4 text-white py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 bg-emerald-500 hover:bg-emerald-600"
             >
               Sign in
             </button>
@@ -147,7 +155,7 @@ const RegisterPage: React.FC = () => {
         <p className="text-center mt-2">
           Already have an account?{" "}
           <Link to="/admin/register" className="text-emerald-500">
-            register
+            Register
           </Link>
         </p>
       </div>

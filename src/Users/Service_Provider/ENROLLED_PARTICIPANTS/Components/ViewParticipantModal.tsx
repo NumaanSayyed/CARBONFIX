@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { backend_url } from "../../../../backend_route";
-import {formatDate} from "../../../../Helpers/Helpers";
+import { formatDate } from "../../../../Helpers/Helpers";
 
 interface Participant {
   id: string;
@@ -16,7 +16,7 @@ interface Participant {
   email?: string;
   proofImage?: string; // Single image URL
   proofVideo?: string; // Single video URL
-  proofId?: string
+  proofId?: string;
 }
 
 interface ViewParticipantModalProps {
@@ -40,7 +40,7 @@ const ViewParticipantModal: React.FC<ViewParticipantModalProps> = ({
   const [proofData, setProofData] = useState<{
     proofImage?: string;
     proofVideo?: string;
-    proofId?: string
+    proofId?: string;
   }>({});
 
   useEffect(() => {
@@ -97,12 +97,12 @@ const ViewParticipantModal: React.FC<ViewParticipantModalProps> = ({
     }
   };
 
-  // API call function for "Send to Admin"
+  // @ts-ignore
   const handleSendToAdmin = async (proofId: string) => {
     try {
-      const token = getWithExpirationCheck("token"); // Get the token from local storage
+      const token = getWithExpirationCheck("token");
       const response = await axios.post(
-        `${backend_url}/serviceProviders/proofs/${proofId}/send-to-admin`, // Your backend API URL
+        `${backend_url}/serviceProviders/proofs/${proofId}/send-to-admin`,
         { proofId }, // Sending proofId to the backend
         {
           headers: {
@@ -110,14 +110,26 @@ const ViewParticipantModal: React.FC<ViewParticipantModalProps> = ({
           },
         }
       );
-  
+
       if (response.status === 200) {
-        alert("Proof sent to admin successfully");
+        // alert("Proof sent to admin successfully");
+        const successDiv = document.createElement("div");
+        successDiv.className =
+          "fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up";
+        successDiv.textContent = "Proof sent to admin successfully";
+        document.body.appendChild(successDiv);
+        setTimeout(() => successDiv.remove(), 3000);
         // Optionally, you could refresh the list or update the UI accordingly
       }
     } catch (error) {
-      console.error("Failed to send proof to admin:", error);
-      alert("Failed to send proof to admin");
+      // console.error("Failed to send proof to admin:", error);
+      // alert("Failed to send proof to admin");
+      const successDiv = document.createElement("div");
+      successDiv.className =
+        "fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up";
+      successDiv.textContent = "Proof already submitted";
+      document.body.appendChild(successDiv);
+      setTimeout(() => successDiv.remove(), 3000);
     }
   };
 
@@ -233,20 +245,28 @@ const ViewParticipantModal: React.FC<ViewParticipantModalProps> = ({
                   No Video Proof Available
                 </p>
               )}
-
-<button
-  onClick={() => {
-    if (proofData.proofId) {
-      console.log("proof id : ",proofData.proofId);
-      handleSendToAdmin(proofData.proofId); // Only call if proofId is defined
-    } else {
-      alert("Proofs not found , submit the proof first!");
-    }
-  }}
-  className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700"
->
-  Send to Admin
-</button>
+              {selectedParticipant.project_enroll_status ===
+                "proof-submitted" && (
+                <button
+                  onClick={() => {
+                    if (proofData.proofId) {
+                      console.log("proof id : ", proofData.proofId);
+                      // handleSendToAdmin(proofData.proofId);
+                    } else {
+                      const successDiv = document.createElement("div");
+                      successDiv.className =
+                        "fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up";
+                      successDiv.textContent =
+                        "Proof not found, submit the proof first!";
+                      document.body.appendChild(successDiv);
+                      setTimeout(() => successDiv.remove(), 3000);
+                    }
+                  }}
+                  className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+                >
+                  Edit Proof
+                </button>
+              )}
             </div>
           </div>
         </div>

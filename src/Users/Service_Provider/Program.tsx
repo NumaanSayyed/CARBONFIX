@@ -5,7 +5,7 @@ interface Program {
   name: string;
   category: string;
   credits: number;
-  status: string;
+  project_status: string;
 }
 
 interface ProgramsGridProps {
@@ -61,23 +61,23 @@ const Program: React.FC<ProgramsGridProps> = ({
             </div>
             <span
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                program.status === "Active"
+                program.project_status === "Active"
                   ? "bg-[#2E7D32]/10 text-[#2E7D32] border border-[#2E7D32]/20 group-hover:bg-[#2E7D32]/20 group-hover:border-[#2E7D32]/30"
-                  : program.status === "Pending"
+                  : program.project_status === "Pending"
                   ? "bg-[#FFA000]/10 text-[#FFA000] border border-[#FFA000]/20 group-hover:bg-[#FFA000]/20 group-hover:border-[#FFA000]/30"
                   : "bg-[#1976D2]/10 text-[#1976D2] border border-[#1976D2]/20 group-hover:bg-[#1976D2]/20 group-hover:border-[#1976D2]/30"
               }`}
             >
               <i
                 className={`fas fa-circle text-xs mr-2 ${
-                  program.status === "Active"
+                  program.project_status === "Active"
                     ? "text-green-500"
-                    : program.status === "Pending"
+                    : program.project_status === "Pending"
                     ? "text-yellow-500"
                     : "text-blue-500"
                 }`}
               ></i>
-              {program.status}
+              {program.project_status}
             </span>
           </div>
           <div className="space-y-4 relative">
@@ -90,19 +90,16 @@ const Program: React.FC<ProgramsGridProps> = ({
             </p>
             <div className="pt-4 border-t border-green-100">
               <div className="flex items-center justify-between">
-               
                 <p className="text-2xl font-bold relative flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
-  {/* <p className="text-2xl font-bold relative flex items-center gap-2 group-hover:scale-105 transition-transform duration-300"> */}
-  <i className="fas fa-leaf text-green-500 group-hover:rotate-12 transition-transform duration-300"></i>
-  <span className="screenshot-hide bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
-    {program.credits}
-  </span>
-  <span className="screenshot-only hidden text-green-600">
-    {program.credits}
-  </span>
-</p>
-
-
+                  {/* <p className="text-2xl font-bold relative flex items-center gap-2 group-hover:scale-105 transition-transform duration-300"> */}
+                  <i className="fas fa-leaf text-green-500 group-hover:rotate-12 transition-transform duration-300"></i>
+                  <span className="screenshot-hide bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
+                    {program.credits}
+                  </span>
+                  <span className="screenshot-only hidden text-green-600">
+                    {program.credits}
+                  </span>
+                </p>
               </div>
               <div className="mt-2 w-full h-1 bg-gray-100 rounded-full overflow-hidden">
                 <div

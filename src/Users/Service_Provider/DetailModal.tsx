@@ -1,4 +1,4 @@
-import React, { useState , useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import EditModal from "./EditModal";
 import { useNavigate } from "react-router-dom";
@@ -9,10 +9,11 @@ interface Program {
   name: string;
   category: string;
   credits: number;
-  status: string;
+  project_status: string;
   start_date: string;
   end_date: string;
-  remark: string
+  remark: string;
+  final_status: string;
 }
 
 interface DetailModalProps {
@@ -21,7 +22,6 @@ interface DetailModalProps {
   onClose: () => void;
   onUpdate: (updatedProgram: Program) => void;
   fetchProjects: () => void;
-  
 }
 
 const DetailModal: React.FC<DetailModalProps> = ({
@@ -30,7 +30,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
   onClose,
   // @ts-ignore
   onUpdate,
-  fetchProjects
+  fetchProjects,
 }) => {
   if (!isOpen || !program) return null;
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -40,10 +40,9 @@ const DetailModal: React.FC<DetailModalProps> = ({
   // @ts-ignore
   const [modalMessage, setModalMessage] = useState("");
 
-
   useEffect(() => {
     setUpdatedProgram(program);
-    console.log("program",program);
+    console.log("program", program);
   }, [program]);
 
   const getCategoryIcon = (category: string) => {
@@ -65,28 +64,32 @@ const DetailModal: React.FC<DetailModalProps> = ({
   const getWithExpirationCheck = (key: string) => {
     const dataString = localStorage.getItem(key);
     if (!dataString) return null;
-  
+
     const data = JSON.parse(dataString);
     const currentTime = new Date().getTime();
-  
+
     if (currentTime > data.expirationTime) {
       localStorage.removeItem(key); // Remove expired item
       return null; // Item expired
     }
-  
+
     return data.value; // Item is still valid
   };
 
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(
-        `${backend_url}/serviceProviders/projects/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${getWithExpirationCheck("token")}`,
-          },
-        }
-      );
+      await axios.delete(`${backend_url}/serviceProviders/projects/${id}`, {
+        headers: {
+          Authorization: `Bearer ${getWithExpirationCheck("token")}`,
+        },
+      });
+      const successDiv = document.createElement("div");
+      successDiv.className =
+        "fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up";
+      successDiv.textContent = "Project Deleted successfully!";
+      document.body.appendChild(successDiv);
+      setTimeout(() => successDiv.remove(), 3000);
+
       setModalMessage("Project deleted successfully!");
       setIsModalOpen(true);
       fetchProjects();
@@ -108,47 +111,31 @@ const DetailModal: React.FC<DetailModalProps> = ({
     return date.toLocaleDateString("en-US", options);
   };
 
-  // const handleUpdate = (newData: Program) => {
-  //   if (Array.isArray(newData)) {
-  //     console.log("✅ Correctly received updated program:", newData[0]);
-  //     onUpdate(newData[0]);
-  //     console.log(newData[0].name);
-  //   } else {
-  //     console.log("✅ Correctly received updated program:", newData);
-  //     onUpdate(newData);
-  //   }
-  //   console.log(program);
-  //   setUpdatedProgram(newData);
-  //   fetchProjects();
-  // };
-
   const handleUpdate = (newData: any) => {
-    console.log("📦 Raw newData:", newData);
-  
+    console.log("Raw newData:", newData);
+
     const updated =
       Array.isArray(newData) && newData.length > 0 ? newData[0] : newData;
-  
+
     const mappedProgram: Program = {
       id: updated.id,
       name: updated.project_name || "", // <- mapping from backend
       category: updated.project_category || "",
       credits: updated.carbon_credits || 0,
-      status: updated.status || "Active",
+      project_status: updated.project_enroll_status || "Active",
       start_date: updated.start_date || "",
       end_date: updated.end_date || "",
       remark: updated.remark || "",
+      final_status: updated.final_status,
     };
-  
-    console.log("✅ Mapped Program object:", mappedProgram);
-  
+
+    console.log("Mapped Program object:", mappedProgram);
+
     onUpdate(mappedProgram);
     setUpdatedProgram(mappedProgram);
     fetchProjects();
   };
-  
-  
-  
-  
+
   const navigate = useNavigate();
 
   return (
@@ -185,7 +172,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-1">Status</p>
               <p className="text-lg font-semibold text-gray-800">
-                {updatedProgram.status}
+                {updatedProgram.project_status}
               </p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
@@ -201,70 +188,70 @@ const DetailModal: React.FC<DetailModalProps> = ({
             <div className="relative pl-8 pb-8 border-l-2 border-green-200">
               <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-green-500"></div>
               <p className="text-sm text-gray-600">Project Started</p>
-              <p className="text-gray-800">{formatDate(updatedProgram.start_date.toLocaleString())}</p>
+              <p className="text-gray-800">
+                {formatDate(updatedProgram.start_date.toLocaleString())}
+              </p>
             </div>
 
             <div className="relative pl-8">
               <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-green-500"></div>
               <p className="text-sm text-gray-600">Estimated Completion</p>
-              <p className="text-gray-800">{formatDate(updatedProgram.end_date.toLocaleString())}</p>
+              <p className="text-gray-800">
+                {formatDate(updatedProgram.end_date.toLocaleString())}
+              </p>
             </div>
           </div>
 
           <button
             onClick={() => {
-              setTimeout(() => setIsEditOpen(true), 0); 
+              setTimeout(() => setIsEditOpen(true), 0);
             }}
             className="w-full bg-green-700 text-white py-3 rounded-xl hover:bg-green-600 transition-all duration-300 [@media(max-width:770px)]:hidden"
           >
             Edit
           </button>
 
-          
-          {/* See particvipants */} 
+          {/* See particvipants */}
           <button
-      onClick={() => navigate(`/dashboard/participant_manage/${updatedProgram.id}`)}
-      // onClick={() => console.log()}
-      className="w-full bg-blue-700 text-white py-3 rounded-xl hover:bg-blue-600 transition-all duration-300 [@media(max-width:770px)]:hidden"
-    >
-      View Participants
-    </button>
-
-    <div className="[@media(min-width:770px)]:hidden flex justify-between">
-
-    <button
-            onClick={() => {
-              setTimeout(() => setIsEditOpen(true), 0); 
-            }}
-            className="p-4 bg-green-700 text-white py-3 rounded-xl hover:bg-green-600 transition-all duration-300 "
+            onClick={() =>
+              navigate(`/dashboard/participant_manage/${updatedProgram.id}`)
+            }
+            // onClick={() => console.log()}
+            className="w-full bg-blue-700 text-white py-3 rounded-xl hover:bg-blue-600 transition-all duration-300 [@media(max-width:770px)]:hidden"
           >
-            Edit
+            View Participants
           </button>
-      
-    <button
-      onClick={() => navigate(`/dashboard/participant_manage/${updatedProgram.id}`)}
-      // onClick={() => console.log()}
-      className=" p-2 bg-blue-700 text-white py-3 rounded-xl hover:bg-blue-600 transition-all duration-300 "
-    >
-      View Participants
-    </button>
-    <button
-            onClick={() => program && handleDelete(updatedProgram.id)}
-            className="p-2 bg-red-700 text-white py-3 rounded-xl hover:bg-red-600 transition-all duration-300 "
-          >
-            {/* <i className="fas fa-trash-alt mr-2"></i>  */}
-            Delete
-          </button>
-    
 
-    </div>
+          <div className="[@media(min-width:770px)]:hidden flex justify-between">
+            <button
+              onClick={() => {
+                setTimeout(() => setIsEditOpen(true), 0);
+              }}
+              className="p-4 bg-green-700 text-white py-3 rounded-xl hover:bg-green-600 transition-all duration-300 "
+            >
+              Edit
+            </button>
 
-   
+            <button
+              onClick={() =>
+                navigate(`/dashboard/participant_manage/${updatedProgram.id}`)
+              }
+              // onClick={() => console.log()}
+              className=" p-2 bg-blue-700 text-white py-3 rounded-xl hover:bg-blue-600 transition-all duration-300 "
+            >
+              View Participants
+            </button>
+            <button
+              onClick={() => program && handleDelete(updatedProgram.id)}
+              className="p-2 bg-red-700 text-white py-3 rounded-xl hover:bg-red-600 transition-all duration-300 "
+            >
+              {/* <i className="fas fa-trash-alt mr-2"></i>  */}
+              Delete
+            </button>
+          </div>
 
-
-
-     {/* Delete Button */}
-     <button
+          {/* Delete Button */}
+          <button
             onClick={() => program && handleDelete(program.id)}
             className="w-full bg-red-700 text-white py-3 rounded-xl hover:bg-red-600 transition-all duration-300 [@media(max-width:770px)]:hidden"
           >
@@ -275,15 +262,13 @@ const DetailModal: React.FC<DetailModalProps> = ({
           {/* Edit Modal */}
           {isEditOpen && (
             <EditModal
-            isOpen={isEditOpen}
-            program={updatedProgram} // Ensure it uses updated state
-            onClose={() => setIsEditOpen(false)}
-            onUpdate={handleUpdate}
-            fetchProjects={fetchProjects}
+              isOpen={isEditOpen}
+              program={updatedProgram} // Ensure it uses updated state
+              onClose={() => setIsEditOpen(false)}
+              onUpdate={handleUpdate}
+              fetchProjects={fetchProjects}
             />
           )}
-
-          
         </div>
       </div>
     </div>
