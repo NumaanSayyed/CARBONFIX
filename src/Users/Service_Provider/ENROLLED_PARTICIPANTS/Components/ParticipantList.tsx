@@ -11,8 +11,9 @@ interface Participant {
   project_enroll_status:
     | "approved"
     | "rejected"
-    | "Completed"
-    | "proof-submitted";
+    | "completed"
+    | "proof-submitted"
+    | "rejected_by_admin";
   serviceType: string;
   enrollmentDate: string;
   location: string;
@@ -39,15 +40,19 @@ const getStatusColor = (status: string) => {
       return "bg-green-100 text-green-800";
     case "rejected":
       return "bg-red-100 text-red-800";
-    case "Completed":
+    case "completed":
       return "bg-blue-100 text-blue-800";
     case "proof-submitted":
       return "bg-indigo-100 text-indigo-800";
-    case "Pending":
-    default:
+    case "rejected_by_admin":
+      return "bg-red-100 text-red-800"
+    case "pending":
       return "bg-yellow-100 text-yellow-800";
+    default:
+      return "bg-gray-100 text-gray-800";
   }
 };
+
 
 const ParticipantList: React.FC<ParticipantListProps> = ({
   participants,
@@ -303,11 +308,33 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                           </button>
                         )}
 
+                         {/* Eye button in case of completed */}
+                         {participant.project_enroll_status ===
+                          "completed" || 
+                          participant.project_enroll_status === "rejected_by_admin" &&
+                          (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedParticipant(participant);
+                              setShowViewModal(true);
+                            }}
+                            className="text-blue-600 hover:text-blue-900"
+                            title="View Details"
+                          >
+                            <i className="fas fa-eye"></i>
+                          </button>
+                        )}
+
                         {/* For other statuses, show Approve & Reject */}
                         {participant.project_enroll_status !== "approved" &&
                           participant.project_enroll_status !== "rejected" &&
                           participant.project_enroll_status !==
-                            "proof-submitted" && (
+                            "proof-submitted" &&
+                            participant.project_enroll_status !==
+                            "completed" && 
+                            participant.project_enroll_status != "rejected_by_admin" &&
+                            (
                             <>
                               <button
                                 className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
@@ -337,112 +364,6 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                           )}
                       </div>
                     </td>
-
-                    {/* <td className="px-6 py-4 text-sm font-medium">
-                      <div className="flex space-x-2">
-                        {participant.project_enroll_status ===
-                        "proof-submitted" ? null : (
-                          <>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedParticipant(participant);
-                                setShowViewModal(true);
-                              }}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              <i className="fas fa-eye"></i>
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedParticipant(participant);
-                                setUpdateFormData({
-                                  credits:
-                                    participant.creditsAllocated?.toString() ||
-                                    "",
-                                  remarks: "",
-                                });
-                                setShowUpdateModal(true);
-                              }}
-                              className="text-green-600 hover:text-green-900"
-                            >
-                              <i className="fas fa-check-circle"></i>
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td> */}
-                    {/* <td className="px-6 py-4">
-                      <div className="flex justify-center">
-                        {participant.project_enroll_status === "approved" && (
-                          <button
-                            className="pr-4 pl-4 mr-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 active:bg-red-700 transition duration-200 ease-in-out"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEnrollmentAction(participant.id, "rejected");
-                            }}
-                          >
-                            Reject
-                          </button>
-                        )}
-                        {participant.project_enroll_status === "rejected" && (
-                          <button
-                            className="pr-4 pl-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 active:bg-green-700 transition duration-200 ease-in-out"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEnrollmentAction(participant.id, "approved");
-                            }}
-                          >
-                            Approve
-                          </button>
-                        )}
-                        {participant.project_enroll_status ===
-                          "proof-submitted" && (
-                          <button
-                            className="pr-4 pl-4 py-2 bg-indigo-500 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-300 active:bg-indigo-700 transition duration-200 ease-in-out"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedParticipant(participant);
-                              setShowViewModal(true);
-                            }}
-                          >
-                            Send to Admin
-                          </button>
-                        )}
-                        {participant.project_enroll_status !== "approved" &&
-                          participant.project_enroll_status !== "rejected" &&
-                          participant.project_enroll_status !==
-                            "proof-submitted" && (
-                            <>
-                              <button
-                                className="pr-4 pl-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 active:bg-green-700 transition duration-200 ease-in-out"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEnrollmentAction(
-                                    participant.id,
-                                    "approved"
-                                  );
-                                }}
-                              >
-                                Approve
-                              </button>
-                              <button
-                                className="pr-4 pl-4 py-2 ml-4 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 active:bg-red-700 transition duration-200 ease-in-out"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEnrollmentAction(
-                                    participant.id,
-                                    "rejected"
-                                  );
-                                }}
-                              >
-                                Reject
-                              </button>
-                            </>
-                          )}
-                      </div>
-                    </td> */}
                   </tr>
                 ))}
               </tbody>

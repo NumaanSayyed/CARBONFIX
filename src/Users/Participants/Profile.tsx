@@ -33,82 +33,156 @@ const Profile: React.FC = () => {
 
   const navigate = useNavigate();
   const chartRef = useRef<HTMLDivElement>(null);
+
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setIsMobile(window.innerWidth < 768);
+  //   };
+  //   handleResize();
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
+
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    if (chartRef.current) {
+        const chart = echarts.init(chartRef.current);
+        const option = {
+            animation: false,
+            tooltip: {
+                trigger: 'item'
+            },
+            color: ['#10B981', '#6366F1', '#9CA3AF'],
+            series: [
+                {
+                    name: 'Project Status',
+                    type: 'pie',
+                    radius: ['60%', '80%'],
+                    avoidLabelOverlap: false,
+                    label: {
+                        show: false
+                    },
+                    emphasis: {
+                        label: {
+                            show: false
+                        }
+                    },
+                    labelLine: {
+                        show: false
+                    },
+                    data: [
+                        { value: projectStats.completed, name: 'Completed' },
+                        { value: projectStats.pending, name: 'Pending' },
+                        { value: projectStats.enrolled - (projectStats.completed + projectStats.pending), name: 'In Progress' }
+                    ]
+                }
+            ]
+        };
+        chart.setOption(option);
+        const handleResize = () => {
+            chart.resize();
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+            chart.dispose();
+            window.removeEventListener('resize', handleResize);
+        };
+    }
+}, [projectStats]);
+
+  // const getBadgeInfo = (creditAmount: number) => {
+  //   if (creditAmount >= 2500) {
+  //     return {
+  //       type: "Gold",
+  //       color: "bg-yellow-400",
+  //       icon: "fa-crown",
+  //       requirement: 501,
+  //       nextLevel: "∞",
+  //     };
+  //   } else if (creditAmount >= 800) {
+  //     return {
+  //       type: "Silver",
+  //       color: "bg-gray-300",
+  //       icon: "fa-medal",
+  //       requirement: 101,
+  //       nextLevel: 501,
+  //     };
+  //   } else if (creditAmount >= 4000) {
+  //     return {
+  //       type: "Diamond",
+  //       color: "bg-blue-400",
+  //       icon: "fa-gem",
+  //       requirement: 501,
+  //       nextLevel: "∞",
+  //     };
+  //   }
+  //   return {
+  //     type: "Bronze",
+  //     color: "bg-orange-400",
+  //     icon: "fa-award",
+  //     requirement: 0,
+  //     nextLevel: 101,
+  //   };
+  // };
   const getBadgeInfo = (creditAmount: number) => {
-    if (creditAmount >= 2500) {
-      return {
-        type: "Gold",
-        color: "bg-yellow-400",
-        icon: "fa-crown",
-        requirement: 501,
-        nextLevel: "∞",
-      };
-    } else if (creditAmount >= 800) {
-      return {
-        type: "Silver",
-        color: "bg-gray-300",
-        icon: "fa-medal",
-        requirement: 101,
-        nextLevel: 501,
-      };
-    } else if (creditAmount >= 4000) {
-      return {
-        type: "Diamond",
-        color: "bg-blue-400",
-        icon: "fa-gem",
-        requirement: 501,
-        nextLevel: "∞",
-      };
+    if (creditAmount >= 501) {
+        return {
+            type: 'Gold',
+            color: 'bg-yellow-400',
+            icon: 'fa-crown',
+            requirement: 501,
+            nextLevel: '∞'
+        };
+    } else if (creditAmount >= 101) {
+        return {
+            type: 'Silver',
+            color: 'bg-gray-300',
+            icon: 'fa-medal',
+            requirement: 101,
+            nextLevel: 501
+        };
     }
     return {
-      type: "Bronze",
-      color: "bg-orange-400",
-      icon: "fa-award",
-      requirement: 0,
-      nextLevel: 101,
+        type: 'Bronze',
+        color: 'bg-orange-400',
+        icon: 'fa-award',
+        requirement: 0,
+        nextLevel: 101
     };
-  };
-  const badgeInfo = getBadgeInfo(credits);
-  
-// @ts-ignore
-  const addCredits = () => {
+};
+
+const badgeInfo = getBadgeInfo(credits);
+const addCredits = () => {
     const previousBadge = getBadgeInfo(credits).type;
     const newCredits = credits + 50;
     const newBadge = getBadgeInfo(newCredits).type;
     if (previousBadge !== newBadge) {
-      setPreviousBadgeType(previousBadge);
-      setBadgeAnimation(true);
-      setShowLevelUpModal(true);
-      const startValue = credits;
-      const endValue = newCredits;
-      const duration = 2000;
-      const steps = 60;
-      const stepValue = (endValue - startValue) / steps;
-      let currentStep = 0;
-      const timer = setInterval(() => {
-        if (currentStep < steps) {
-          setCredits(Math.round(startValue + stepValue * currentStep));
-          currentStep++;
-        } else {
-          setCredits(endValue);
-          clearInterval(timer);
-        }
-      }, duration / steps);
-      setTimeout(() => {
-        setBadgeAnimation(false);
-        setShowLevelUpModal(false);
-      }, 2000);
+        setPreviousBadgeType(previousBadge);
+        setBadgeAnimation(true);
+        setShowLevelUpModal(true);
+        const startValue = credits;
+        const endValue = newCredits;
+        const duration = 2000;
+        const steps = 60;
+        const stepValue = (endValue - startValue) / steps;
+        let currentStep = 0;
+        const timer = setInterval(() => {
+            if (currentStep < steps) {
+                setCredits(Math.round(startValue + stepValue * currentStep));
+                currentStep++;
+            } else {
+                setCredits(endValue);
+                clearInterval(timer);
+            }
+        }, duration / steps);
+        setTimeout(() => {
+            setBadgeAnimation(false);
+            setShowLevelUpModal(false);
+        }, 2000);
     } else {
-      setCredits(newCredits);
+        setCredits(newCredits);
     }
-  };
+};
+  
   const getWithExpirationCheck = (key: string) => {
     const dataString = localStorage.getItem(key);
     if (!dataString) return null;
@@ -443,7 +517,7 @@ const Profile: React.FC = () => {
                       </span>
                     </div>{" "}
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Pending</span>
+                      <span className="text-gray-600">Project Approval Pending</span>
                       <span className="text-2xl font-bold text-gray-400">
                         {projectStats.pending}
                       </span>

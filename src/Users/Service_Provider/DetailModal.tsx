@@ -14,6 +14,7 @@ interface Program {
   end_date: string;
   remark: string;
   final_status: string;
+  location: string
 }
 
 interface DetailModalProps {
@@ -127,6 +128,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
       end_date: updated.end_date || "",
       remark: updated.remark || "",
       final_status: updated.final_status,
+      location: updated.location
     };
 
     console.log("Mapped Program object:", mappedProgram);

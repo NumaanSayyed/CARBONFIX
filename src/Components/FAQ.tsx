@@ -12,6 +12,7 @@ const FAQ: React.FC = () => {
     { id: "projects", name: "Projects & Rewards", icon: "fa-award" },
   ];
 
+
   const faqData = {
     general: [
       {
@@ -22,7 +23,7 @@ const FAQ: React.FC = () => {
       {
         question: "How do I earn carbon credits?",
         answer:
-          "You can earn carbon credits through various activities such as using public transportation, reducing energy consumption, participating in local environmental projects, and making sustainable purchasing decisions. Each verified action contributes to your carbon credit balance.",
+          "You can earn carbon credits through various activities such as forestation , soil conservation , water conservation , e-waste recycling and animal. Each verified action contributes to your carbon credit balance.",
       },
       {
         question: "What are the benefits of joining?",
@@ -34,12 +35,12 @@ const FAQ: React.FC = () => {
       {
         question: "How can I enroll in sustainability projects?",
         answer:
-          'Enrolling in sustainability projects is simple. Navigate to the Projects section, browse available options, and click "Enroll" on your chosen project. You\'ll receive immediate access to project materials and can track your progress through your dashboard.',
+          'Enrolling in sustainability projects is simple. Navigate to the Projects section, browse available projects, and click "Join Project" on your chosen project. Once your request get approved then you will be enrolled. You can track your progress and impact through your dashboard.',
       },
       {
         question: "How can service providers list sustainability projects?",
         answer:
-          "Service providers can create an account, complete our verification process, and use our Project Management Portal to list their sustainability initiatives. We provide tools for project creation, participant management, and impact tracking.",
+          "Service providers can create an account, complete our verification process, and from their dashboard provided they can create a project. We provide tools for project creation, participant management, and impact tracking.",
       },
       {
         question: "How can institutions track student engagement?",
@@ -51,24 +52,24 @@ const FAQ: React.FC = () => {
       {
         question: "How do I reset my password?",
         answer:
-          'To reset your password, click the "Forgot Password" link on the login page. Enter your registered email address to receive a password reset link. Follow the link to create a new secure password. For security, the link expires after 24 hours.',
+          'To reset your password, click the "Forgot Password" link on the login page. Enter your registered email address to receive a password reset link. Follow the link to create a new secure password. For security, the link expires after sometime.',
       },
       {
         question: "Who do I contact for account-related issues?",
         answer:
-          "For account-related support, contact our dedicated support team available 24/7 through: Email: support@carbonplatform.com, Live Chat: Available on our website, Phone: +1 (800) 123-4567. Average response time is under 2 hours.",
+          "For account-related support, contact our dedicated support team available 24/7 through: Email: noreply@carbonfix.in. Our team will contact you as soon as possible",
       },
       {
         question: "Is my data secure on this platform?",
         answer:
-          "Yes, we implement industry-leading security measures including end-to-end encryption, regular security audits, and compliance with GDPR and other privacy regulations. Your data is stored in secure, encrypted databases with regular backups.",
+          "Yes, we implement industry-leading security measures including end-to-end encryption, regular security audits, and compliance with GDPR and other privacy regulations. Your data is stored in secure an encrypted form.",
       },
     ],
     projects: [
       {
         question: "How are carbon credits tracked?",
         answer:
-          "Carbon credits are tracked using our proprietary blockchain-based system that ensures transparency and accuracy. Each action is verified, recorded, and converted to carbon credits using standardized calculations. Real-time tracking is available in your dashboard.",
+          "Carbon credits are just a virtual point , each project you joined and worked on that you get the carbon credits which you can easily track from your profile dashboard.",
       },
       {
         question: "What rewards can I earn?",
@@ -78,10 +79,82 @@ const FAQ: React.FC = () => {
       {
         question: "How do I verify my project completion?",
         answer:
-          "Project completion is automatically verified through our platform. Upon meeting all project requirements, you'll receive a digital certificate of completion, and your account will be credited with the corresponding rewards and carbon credits.",
+          "Project completion is verified through our process. Upon meeting all project requirements, you'll receive a carbon credit points , once the project proof is verified by the admin then you'll receive the awards and credits and the project will be marked as completed .",
       },
     ],
   };
+
+
+  // const faqData = {
+  //   general: [
+  //     {
+  //       question: "What is the Carbon Compensation Platform?",
+  //       answer:
+  //         "Our Carbon Compensation Platform is a comprehensive digital ecosystem designed to help individuals and organizations track, reduce, and offset their carbon footprint. Through innovative technology and partnerships, we enable users to make meaningful contributions to environmental sustainability.",
+  //     },
+  //     {
+  //       question: "How do I earn carbon credits?",
+  //       answer:
+  //         "You can earn carbon credits through various activities such as using public transportation, reducing energy consumption, participating in local environmental projects, and making sustainable purchasing decisions. Each verified action contributes to your carbon credit balance.",
+  //     },
+  //     {
+  //       question: "What are the benefits of joining?",
+  //       answer:
+  //         "Members enjoy multiple benefits including: personalized sustainability tracking, access to exclusive eco-friendly products and services, community engagement opportunities, educational resources, and rewards for environmental actions. Plus, you'll be part of a global movement for positive change.",
+  //     },
+  //   ],
+  //   users: [
+  //     {
+  //       question: "How can I enroll in sustainability projects?",
+  //       answer:
+  //         'Enrolling in sustainability projects is simple. Navigate to the Projects section, browse available options, and click "Enroll" on your chosen project. You\'ll receive immediate access to project materials and can track your progress through your dashboard.',
+  //     },
+  //     {
+  //       question: "How can service providers list sustainability projects?",
+  //       answer:
+  //         "Service providers can create an account, complete our verification process, and use our Project Management Portal to list their sustainability initiatives. We provide tools for project creation, participant management, and impact tracking.",
+  //     },
+  //     {
+  //       question: "How can institutions track student engagement?",
+  //       answer:
+  //         "Institutions receive access to our comprehensive Analytics Dashboard, offering real-time insights into student participation, project effectiveness, and environmental impact metrics. Custom reports can be generated for specific timeframes and activities.",
+  //     },
+  //   ],
+  //   technical: [
+  //     {
+  //       question: "How do I reset my password?",
+  //       answer:
+  //         'To reset your password, click the "Forgot Password" link on the login page. Enter your registered email address to receive a password reset link. Follow the link to create a new secure password. For security, the link expires after 24 hours.',
+  //     },
+  //     {
+  //       question: "Who do I contact for account-related issues?",
+  //       answer:
+  //         "For account-related support, contact our dedicated support team available 24/7 through: Email: support@carbonplatform.com, Live Chat: Available on our website, Phone: +1 (800) 123-4567. Average response time is under 2 hours.",
+  //     },
+  //     {
+  //       question: "Is my data secure on this platform?",
+  //       answer:
+  //         "Yes, we implement industry-leading security measures including end-to-end encryption, regular security audits, and compliance with GDPR and other privacy regulations. Your data is stored in secure, encrypted databases with regular backups.",
+  //     },
+  //   ],
+  //   projects: [
+  //     {
+  //       question: "How are carbon credits tracked?",
+  //       answer:
+  //         "Carbon credits are tracked using our proprietary blockchain-based system that ensures transparency and accuracy. Each action is verified, recorded, and converted to carbon credits using standardized calculations. Real-time tracking is available in your dashboard.",
+  //     },
+  //     {
+  //       question: "What rewards can I earn?",
+  //       answer:
+  //         "Our rewards project offers various incentives including: Eco-friendly product discounts, Premium membership benefits, Partner project vouchers, Community recognition badges, and Carbon credit multipliers. Rewards are automatically credited to your account upon qualifying actions.",
+  //     },
+  //     {
+  //       question: "How do I verify my project completion?",
+  //       answer:
+  //         "Project completion is automatically verified through our platform. Upon meeting all project requirements, you'll receive a digital certificate of completion, and your account will be credited with the corresponding rewards and carbon credits.",
+  //     },
+  //   ],
+  // };
 
   const filteredFAQs = faqData[activeCategory as keyof typeof faqData].filter(
     (faq) =>

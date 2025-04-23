@@ -8,6 +8,7 @@ import FeaturedProjects from "../Components/FeaturedProject";
 import FAQ from "../Components/FAQ";
 import { backend_url } from "../backend_route";
 import axios from "axios";
+import MedalProgress from "../Components/MedalProgress";
 
 const Homepage: React.FC = () => {
   const [targetStats, setTargetStats] = useState({
@@ -107,6 +108,8 @@ const Homepage: React.FC = () => {
 
       {/* Testimonials Section */}
       <Testimonials />
+
+      <MedalProgress/>
 
       <FAQ />
     </>

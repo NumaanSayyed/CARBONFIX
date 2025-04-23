@@ -166,18 +166,28 @@ const ViewParticipantModal: React.FC<ViewParticipantModalProps> = ({
           </div>
 
           {/* Participant Info */}
+
+          {/* Use these color scheme for showing the status  */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div>
               <p className="text-sm text-gray-500">Status</p>
               <span
-                className={`px-3 py-1 rounded-full text-sm text-white ${
+                className={`px-3 py-1 rounded-full text-sm ${
                   selectedParticipant.project_enroll_status === "approved"
-                    ? "bg-green-500"
+                    ? "bg-green-100 text-green-800"
                     : selectedParticipant.project_enroll_status === "pending"
-                    ? "bg-yellow-500"
+                    ? "bg-yellow-100 text-yellow-800"
                     : selectedParticipant.project_enroll_status === "rejected"
-                    ? "bg-red-500"
-                    : "bg-gray-500" // default if none of the statuses match
+                    ? "bg-red-100 text-red-800"
+                    : selectedParticipant.project_enroll_status ===
+                      "proof-submitted"
+                    ? "bg-indigo-100 text-indigo-800"
+                    : selectedParticipant.project_enroll_status === "completed"
+                    ? "bg-blue-100 text-blue-800"
+                    : selectedParticipant.project_enroll_status ===
+                      "rejected_by_admin"
+                    ? "bg-red-100 text-red-800"
+                    : "bg-gray-500 text-white" // default if none match
                 }`}
               >
                 {selectedParticipant.project_enroll_status}

@@ -75,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log("userdata in context after login:", userData.participant); // ✅ log the actual user
       } else if (type === "Service Provider") {
         route = "/dashboard/service_provider";
+        setUser(userData.serviceProvider);
       } else if (type === "admin") {
         route = "/dashboard/admin";
       }
@@ -126,7 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (token && type) {
       setIsAuthenticated(true);
       setUserType(type);
-      setUser(storedUser); // Load the user from localStorage
+      setUser(storedUser);
 
       const route =
         type === "Service Provider"
@@ -139,10 +140,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  // Log user whenever it changes
   useEffect(() => {
-    console.log("User data changed:", user); // ✅ log the user whenever it changes
-  }, [user]); // This will log every time the user state changes
+    console.log("User data changed:", user);
+  }, [user]); 
 
   useEffect(() => {
     const data = getWithExpirationCheck("user");

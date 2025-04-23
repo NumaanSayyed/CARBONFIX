@@ -26,10 +26,12 @@ const getStatusColor = (status: string) => {
       return "bg-green-100 text-green-800";
     case "rejected":
       return "bg-red-100 text-red-800";
-    case "Completed":
+    case "completed":
       return "bg-blue-100 text-blue-800";
     case "proof-submitted":
       return "bg-indigo-100 text-indigo-800";
+    case "rejected_by_admin":
+      return "bg-red-100 text-red-800"
     default:
       return "bg-yellow-100 text-yellow-800";
   }
@@ -57,19 +59,12 @@ const ParticipantList = () => {
         const transformed: Participant[] = data.map(
           (item: any, index: number) => ({
             id: `${index + 1}`,
-            name: `Participant ${index + 1}`,
+            name: item.project_name,
             avatar: `https://i.pravatar.cc/150?img=${index + 1}`,
             project_enroll_status: item.status,
-            // item.status === "approved_by_admin"
-            //   ? "approved"
-            //   : item.status === "rejected"
-            //   ? "rejected"
-            //   : item.status === "completed"
-            //   ? "Completed"
-            //   : "Proof Submitted", // adjust as needed
             serviceType: item.org_type || "Unknown",
-            enrollmentDate: "2025-01-01", // You can include this if available in API
-            location: item.project_category, // Add if available in your DB
+            enrollmentDate: "2025-01-01", 
+            location: item.project_category, 
             creditsEarned: item.credit_earned,
             creditsAllocated: item.credit_allocated,
           })
@@ -93,12 +88,12 @@ const ParticipantList = () => {
               <tr>
                 {[
                   "S.No",
-                  "Location",
-                  "Service Type",
+                  "Project Name",
+                  "Area",
                   "Status",
                   "Credits Earned",
                   "Credits Allocated",
-                  "Actions",
+                  // "Actions",
                 ].map((heading) => (
                   <th
                     key={heading}
@@ -119,10 +114,10 @@ const ParticipantList = () => {
                     {index + 1}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {participant.location}
+                    {participant.name}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {participant.serviceType}
+                  {participant.location}
                   </td>
                   <td className="px-6 py-4">
                     <span
@@ -138,13 +133,6 @@ const ParticipantList = () => {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
                     {participant.creditsAllocated ?? "N/A"}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">
-                        <i className="fas fa-eye"></i>
-                      </button>
-                    </div>
                   </td>
                 </tr>
               ))}

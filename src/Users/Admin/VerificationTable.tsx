@@ -154,12 +154,6 @@ const VerificationTable: React.FC = () => {
               </div>
             )}
 
-            {/* <p className="text-gray-800 mt-4">{proofContent.description}</p> */}
-
-            {/* <button
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 !rounded-button whitespace-nowrap mt-4"
-            >View Documents</button> */}
-
             <button
               onClick={() => setShowProofModal(false)}
               className="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition-colors duration-300 !rounded-button whitespace-nowrap mt-4"
@@ -206,12 +200,15 @@ const VerificationTable: React.FC = () => {
                     className={`px-3 py-1 rounded-full text-sm ${
                       participant.status === "pending_admin_review"
                         ? "bg-orange-100 text-orange-700"
+                        : participant.status === "rejected_by_admin"
+                        ? "bg-red-100 text-red-700"
                         : "bg-emerald-100 text-emerald-700"
                     }`}
                   >
                     {participant.status}
                   </span>
                 </td>
+
                 <td className="py-4 px-4">
                   <button
                     onClick={() => openProofModal(participant)}

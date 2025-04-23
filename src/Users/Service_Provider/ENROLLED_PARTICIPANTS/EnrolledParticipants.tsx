@@ -17,8 +17,9 @@ interface Participant {
   project_enroll_status:
     | "approved"
     | "rejected"
-    | "Completed"
-    | "proof-submitted";
+    | "completed"
+    | "proof-submitted"
+    |"rejected_by_admin";
   serviceType: string;
   enrollmentDate: string;
   location: string;
@@ -103,6 +104,10 @@ const EnrolledParticipants: React.FC = () => {
       const matchesStatus =
         selectedFilters.status === "All" ||
         participant.project_enroll_status === selectedFilters.status;
+
+
+      console.log(participant.project_enroll_status);
+      console.log(selectedFilters.status);
 
       const matchesServiceType =
         selectedFilters.serviceType === "All" ||

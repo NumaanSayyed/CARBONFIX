@@ -3,6 +3,7 @@ import axios from "axios";
 import { backend_url } from "../backend_route";
 import { useAuth } from "../Helpers/authContext";
 import { getWithExpirationCheck } from "../Helpers/Helpers";
+import { useNavigate } from "react-router-dom";
 
 const Project: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -14,7 +15,8 @@ const Project: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
- // @ts-ignore
+
+  // @ts-ignore
   const { user, userType } = useAuth();
 
   const categories = [
@@ -25,33 +27,24 @@ const Project: React.FC = () => {
     { name: "Animal", icon: "fa-paw" },
   ];
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     console.log("User data in another page:", user); // Debug
   }, [user]);
 
-  // const getWithExpirationCheck = (key: string) => {
-  //   const dataString = localStorage.getItem(key);
-  //   if (!dataString) return null;
-  //   const data = JSON.parse(dataString);
-  //   const currentTime = new Date().getTime();
-  //   if (currentTime > data.expirationTime) {
-  //     localStorage.removeItem(key);
-  //     return null;
-  //   }
-  //   return data.value;
-  // };
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get(
+        `${backend_url}/serviceProviders/allProjects`
+      );
+      setProjects(response.data.projects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get(
-          `${backend_url}/serviceProviders/allProjects`
-        );
-        setProjects(response.data.projects);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      }
-    };
     fetchProjects();
   }, []);
 
@@ -80,15 +73,41 @@ const Project: React.FC = () => {
         project_id: selectedProject.id,
       });
 
-      setMessage(response.data.message || "Enrollment request submitted!");
-      setIsModalOpen(true);
+      // if(response.data.message == "Enrollment request already exists")
+
+      if (
+        response.data.message === "Enrollment request submitted successfully"
+      ) {
+        setMessage(
+          "Woohoo! Your request to join this project is in the works. We'll let you know soon!"
+        );
+        setIsModalOpen(true);
+      } else if (
+        response.data.message === "Enrollment request already exists"
+      ) {
+        setMessage(
+          "Looks like you're already on the list! Hang tight, you're almost there!"
+        );
+        setIsModalOpen(true);
+      }
+
+      fetchProjects();
       setSelectedProject(null);
     } catch (error: any) {
-      setMessage(error.response?.data?.error || "Failed to submit request.");
-      setIsModalOpen(true);
+      if (error.response?.data?.error === "Enrollment request already exists") {
+        setMessage(
+          "Looks like you're already on the list! Hang tight, you're almost there!"
+        );
+        setIsModalOpen(true);
+      }
     } finally {
       setIsJoining(false);
     }
+  };
+
+  const closeModals = () => {
+    setIsModalOpen(false);
+    setSelectedProject(null);
   };
 
   useEffect(() => {
@@ -185,24 +204,38 @@ const Project: React.FC = () => {
                         ? "https://images.unsplash.com/photo-1612311533219-3687fcf1ee78?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGUlMjB3YXN0ZSUyMGltYWdlfGVufDB8fDB8fHww"
                         : project.project_category?.toLowerCase() === "animal"
                         ? "https://public.readdy.ai/ai/img_res/b211efe60d5975f7c0687abc3889202c.jpg"
-                        : "https://public.readdy.ai/ai/img_res/a86a5d9bd78a933da2be1d249b523709.jpg") // default fallback
+                        : "https://public.readdy.ai/ai/img_res/a86a5d9bd78a933da2be1d249b523709.jpg")
                     }
                     alt={project.project_category}
                     className="w-full h-full object-cover object-center transform transition-transform duration-300 hover:scale-105"
                   />
 
-                  <div className="absolute top-4 left-4">
+                  <div className="absolute top-4 left-4 space-y-1">
                     <span className="bg-white/90 px-3 py-1 rounded-full text-sm font-medium text-gray-700">
                       {project.project_category}
                     </span>
                   </div>
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    {project.project_name}
-                  </h3>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xl font-semibold text-gray-800">
+                      {project.project_name}
+                    </span>
+                    <span className="flex items-center text-green-600 font-semibold bg-green-100 px-2 py-1 rounded-lg">
+                      {project.carbon_credits}
+                      <span className="ml-1 text-sm text-gray-600">CC</span>
+                    </span>
+                  </div>
+
                   <p className="text-gray-600 mb-4 line-clamp-2">
                     {project.remark}
+                  </p>
+                  <p className="mb-2">
+                    {project.location && (
+                      <span className=" bg-white/90 py-1 rounded-full text-sm font-medium text-gray-700">
+                        📍 {project.location}
+                      </span>
+                    )}
                   </p>
                   <div className="mb-4">
                     <div className="flex justify-between text-sm text-gray-500 mb-1">
@@ -216,6 +249,24 @@ const Project: React.FC = () => {
                         }`}
                         style={{ width: `${progress}%` }}
                       ></div>
+                    </div>
+
+                    {/* 👇 Date Section - Added */}
+                    <div className="flex mt-3 justify-between items-center text-sm text-gray-600 mb-4">
+                      <div className="flex items-center space-x-1">
+                        <i className="fas fa-calendar-alt text-green-500"></i>
+                        <span>
+                          <strong></strong>{" "}
+                          {formatStandardDate(project.start_date)}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <i className="fas fa-calendar-check text-blue-500"></i>
+                        <span>
+                          <strong></strong>{" "}
+                          {formatStandardDate(project.end_date)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
@@ -255,7 +306,21 @@ const Project: React.FC = () => {
             <img
               src={
                 selectedProject.imageUrl ||
-                "https://public.readdy.ai/ai/img_res/a86a5d9bd78a933da2be1d249b523709.jpg"
+                (selectedProject.project_category?.toLowerCase() ===
+                "forestation"
+                  ? "https://public.readdy.ai/ai/img_res/67843d2d14547996180132db1e768704.jpg"
+                  : selectedProject.project_category?.toLowerCase() === "water"
+                  ? "https://public.readdy.ai/ai/img_res/360162775bfd838963f21d4d213dbef1.jpg"
+                  : selectedProject.project_category?.toLowerCase() === "soil"
+                  ? "https://public.readdy.ai/ai/img_res/6abf801a75ad5fee23a95ca764a4cf34.jpg"
+                  : selectedProject.project_category?.toLowerCase() ===
+                      "re-cycle" ||
+                    selectedProject.project_category?.toLowerCase() ===
+                      "recycle"
+                  ? "https://images.unsplash.com/photo-1612311533219-3687fcf1ee78?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGUlMjB3YXN0ZSUyMGltYWdlfGVufDB8fDB8fHww"
+                  : selectedProject.project_category?.toLowerCase() === "animal"
+                  ? "https://public.readdy.ai/ai/img_res/b211efe60d5975f7c0687abc3889202c.jpg"
+                  : "https://public.readdy.ai/ai/img_res/a86a5d9bd78a933da2be1d249b523709.jpg") // default fallback
               }
               alt={selectedProject.project_name}
               className="w-full h-48 object-cover rounded-lg mb-4"
@@ -295,12 +360,28 @@ const Project: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
             <p className="text-center text-gray-800 mb-4">{message}</p>
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 !rounded-button whitespace-nowrap"
-            >
-              Close
-            </button>
+
+            <div className="flex space-x-4">
+              <button
+                onClick={() => {
+                  // Handle the "Join Other Project" logic
+                  closeModals();
+                }}
+                className="flex-1 bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300"
+              >
+                Join Other Project
+              </button>
+
+              <button
+                onClick={() => {
+                  navigate("/profile"); // Navigate to profile/dashboard page
+                  closeModals();
+                }}
+                className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300"
+              >
+                Go to Dashboard
+              </button>
+            </div>
           </div>
         </div>
       )}

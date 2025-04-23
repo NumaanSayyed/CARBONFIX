@@ -102,7 +102,7 @@ const SearchFilter: React.FC<ParticipantSearchFilterProps> = ({
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
                 <option value="Completed">Completed</option>
-                <option value="Proof Submitted">Proof Submitted</option>
+                <option value="proof-submitted">Proof-Submitted</option>
               </select>
             </div>
 

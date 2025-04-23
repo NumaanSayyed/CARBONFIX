@@ -148,7 +148,7 @@ const Header: React.FC<HeaderProps> = ({
                 className="bg-green-500 hover:bg-green-600 text-white px-5 sm:px-6 py-2 text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg whitespace-nowrap"
               >
                 <i className="fas fa-user-plus mr-2"></i>
-                Join Now
+                Login
               </Link>
             )}
           </div>
@@ -229,7 +229,7 @@ const Header: React.FC<HeaderProps> = ({
                     className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg whitespace-nowrap"
                   >
                     <i className="fas fa-user-plus mr-2"></i>
-                    Join Now
+                    Login
                   </Link>
                 )}
               </nav>

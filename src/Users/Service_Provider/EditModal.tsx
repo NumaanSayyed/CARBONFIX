@@ -3,7 +3,6 @@ import axios from "axios";
 import { backend_url } from "../../backend_route";
 import { useNavigate } from "react-router-dom";
 
-
 interface Program {
   id: number;
   name: string;
@@ -13,6 +12,7 @@ interface Program {
   start_date: string;
   end_date: string;
   remark: string;
+  location: string
 }
 
 interface EditModalProps {
@@ -31,8 +31,10 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, program, onClose, onUpdat
     project_status: "",
     start_date: "",
     end_date: "",
-    remark: ""
+    remark: "",
+    location: "",
   });
+  const [remarkError, setRemarkError] = useState<string | null>(null); // State for remark validation error
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const navigate = useNavigate();
@@ -62,6 +64,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, program, onClose, onUpdat
         start_date: program.start_date,
         end_date: program.end_date,
         remark: program.remark,
+        location: program.location
       });
     }
   }, [program]);
@@ -74,8 +77,15 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, program, onClose, onUpdat
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    onClose();
     e.preventDefault();
+
+    // Validation for remark
+    if (formData.remark.length <= 250) {
+      setRemarkError("Remarks must be of 250 characters.");
+      return;
+    } else {
+      setRemarkError(null);
+    }
 
     const { project_status, ...dataToSend } = formData;
 
@@ -93,9 +103,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, program, onClose, onUpdat
       const updatedData: Program = response.data;
       onUpdate(updatedData);
       onClose();
-      onClose();
-      navigate("/dashboard/service_provider")
-
+      navigate("/dashboard/service_provider");
     } catch (error) {
       console.error("Error updating project:", error);
       setModalMessage("Failed to update project.");
@@ -191,15 +199,28 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, program, onClose, onUpdat
           </div>
 
           <div>
+            <label className="block text-gray-700">Project Location</label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-2"
+              required
+            />
+          </div>
+
+          <div>
             <label className="block text-gray-700">Remark</label>
             <input
               type="text"
               name="remark"
               value={formData.remark}
               onChange={handleChange}
-              className="w-full border rounded-lg pt-2"
+              className={`w-full border rounded-lg pt-2 ${remarkError ? 'border-red-500' : ''}`} // Red border on error
               required
             />
+            {remarkError && <p className="text-red-500 text-sm mt-1">{remarkError}</p>} {/* Show error message */}
           </div>
 
           <div className="flex justify-between">
@@ -225,7 +246,6 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, program, onClose, onUpdat
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

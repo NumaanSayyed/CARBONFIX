@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { backend_url } from "../../backend_route";
 import Header from "./Header";
 import ActionButton from "./ActionButton";
 import NavigationButton from "./NavigationButton";
 import ProgramsGrid from "./Program";
 import DetailModal from "./DetailModal";
 import Modal from "./Modal";
-import axios from "axios";
-import { backend_url } from "../../backend_route";
+
 const Dashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -21,9 +22,12 @@ const Dashboard: React.FC = () => {
       start_date: string;
       end_date: string;
       remark: string;
+      location: string;
     }[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [modalMessage, setModalMessage] = useState("");
+
   const fetchProjects = async () => {
     try {
       const token = getWithExpirationCheck("token");
@@ -46,7 +50,9 @@ const Dashboard: React.FC = () => {
         start_date: project.start_date,
         end_date: project.end_date,
         remark: project.remark,
+        location: project.location,
       }));
+      console.log("Fetched Projects:", fetchedProjects);
       setPrograms(fetchedProjects);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -54,18 +60,23 @@ const Dashboard: React.FC = () => {
       setLoading(false);
     }
   };
-  // useEffect to fetch projects initially
+
   useEffect(() => {
     fetchProjects();
   }, []);
+
   // Form States
   const [selectedCategory, setSelectedCategory] = useState("");
   const [programName, setProgramName] = useState("");
   const [carbonCredits, setCarbonCredits] = useState("");
   const [remarks, setRemarks] = useState("");
+  const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
   const [completionDate, setCompletionDate] = useState("");
-  const [modalMessage, setModalMessage] = useState("");
+
+  // Remark Validation State
+  const [isRemarkValid, setIsRemarkValid] = useState(true); // Track validity of the remark
+
   const getWithExpirationCheck = (key: string) => {
     const dataString = localStorage.getItem(key);
     if (!dataString) return null;
@@ -77,14 +88,27 @@ const Dashboard: React.FC = () => {
     }
     return data.value; // Item is still valid
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Remarks validation (100 to 200 characters)
+    if (remarks.length <= 250) {
+      setIsRemarkValid(false); // Invalid remark
+      setModalMessage("Remarks must be between 100 and 200 characters.");
+      setIsModalOpen(true);
+      return; // Prevent form submission
+    } else {
+      setIsRemarkValid(true); // Valid remark
+    }
+
     const token = getWithExpirationCheck("token");
     if (!token) {
       setModalMessage("Unauthorized! Please log in again.");
       setIsModalOpen(true);
       return;
     }
+
     const requestData = {
       project_category: selectedCategory,
       project_name: programName,
@@ -92,24 +116,25 @@ const Dashboard: React.FC = () => {
       start_date: startDate,
       end_date: completionDate,
       remark: remarks,
+      location: location,
     };
+
     try {
-      // @ts-ignore
       const response = await axios.post(
         `${backend_url}/serviceProviders/addProject`,
         requestData,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       const successDiv = document.createElement("div");
       successDiv.className =
         "fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up";
       successDiv.textContent = "Project Added successfully!";
       document.body.appendChild(successDiv);
       setTimeout(() => successDiv.remove(), 3000);
+
       // ✅ Clear form fields
       setSelectedCategory("");
       setProgramName("");
@@ -117,6 +142,7 @@ const Dashboard: React.FC = () => {
       setStartDate("");
       setCompletionDate("");
       setRemarks("");
+      setLocation("");
       setIsModalOpen(false);
       fetchProjects();
     } catch (error: any) {
@@ -125,19 +151,21 @@ const Dashboard: React.FC = () => {
       setIsModalOpen(true);
     }
   };
+
   const getTomorrowDate = () => {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
     return tomorrow.toISOString().split("T")[0]; // Format: YYYY-MM-DD
   };
+
   const getMinCompletionDate = () => {
     if (!startDate) return ""; // No min if start date not selected
     const date = new Date(startDate);
     date.setDate(date.getDate() + 1); // Next day after start
     return date.toISOString().split("T")[0];
   };
-  // @ts-ignore
+
   const handleUpdate = async (updatedProgram: any) => {
     try {
       const token = getWithExpirationCheck("token");
@@ -145,7 +173,7 @@ const Dashboard: React.FC = () => {
         console.error("Unauthorized! No token found.");
         return;
       }
-      // Fetch updated project from the backend
+
       const response = await axios.get(
         `${backend_url}/serviceProviders/projects`,
         {
@@ -161,13 +189,14 @@ const Dashboard: React.FC = () => {
         start_date: project.start_date,
         end_date: project.end_date,
         remark: project.remark,
+        location: project.location,
       }));
       setPrograms(fetchedProjects);
     } catch (error) {
       console.error("Error fetching updated projects:", error);
     }
   };
-  // @ts-ignore
+
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(`${backend_url}/serviceProviders/projects/${id}`, {
@@ -182,6 +211,7 @@ const Dashboard: React.FC = () => {
       setIsModalOpen(true);
     }
   };
+
   return (
     <div className="pt-20 min-h-screen bg-gradient-to-br from-green-50 to-blue-50 font-['SF Pro Text']">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300">
@@ -194,13 +224,11 @@ const Dashboard: React.FC = () => {
           onClick={() => console.log("Navigating to Enrolled Participants...")}
         />
         {loading ? (
-          // <p className="text-center text-gray-500">Loading projects...</p>
           <div className="flex justify-center">
             <i className="fas fa-circle-notch fa-spin"></i>
           </div>
         ) : programs.length > 0 ? (
           <ProgramsGrid
-            // programs={programs} // Assign unique key
             programs={programs.map((proj) => ({
               ...proj,
               key: proj.id || proj.name,
@@ -211,14 +239,19 @@ const Dashboard: React.FC = () => {
         ) : (
           <p className="text-center text-gray-500">No projects available.</p>
         )}
-        {/* Detail Modal */}
-        <DetailModal
-          isOpen={isDetailModalOpen}
-          program={selectedProgram}
-          onClose={() => setIsDetailModalOpen(false)}
-          onUpdate={handleUpdate} // ✅ Pass onUpdate function
-          fetchProjects={fetchProjects}
-        />
+        {isDetailModalOpen &&
+          (selectedProgram ? (
+            <DetailModal
+              isOpen={isDetailModalOpen}
+              program={selectedProgram}
+              onClose={() => setIsDetailModalOpen(false)}
+              onUpdate={handleUpdate}
+              fetchProjects={fetchProjects}
+            />
+          ) : (
+            <div>Loading details...</div>
+          ))}
+
         {/* Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -239,7 +272,7 @@ const Dashboard: React.FC = () => {
             {/* Service Category */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
-                Service Category
+                Service Type
               </label>
               <select
                 value={selectedCategory}
@@ -247,7 +280,7 @@ const Dashboard: React.FC = () => {
                 className="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200"
                 required
               >
-                <option value="">Select Category</option>
+                <option value="">Select Type</option>
                 <option value="Forestation">Forestation</option>
                 <option value="Water">Water</option>
                 <option value="Soil">Soil</option>
@@ -288,7 +321,6 @@ const Dashboard: React.FC = () => {
               <input
                 type="date"
                 value={startDate}
-                min={getTomorrowDate()}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200"
                 required
@@ -302,8 +334,21 @@ const Dashboard: React.FC = () => {
               <input
                 type="date"
                 value={completionDate}
-                min={getMinCompletionDate()} 
+                min={getMinCompletionDate()}
                 onChange={(e) => setCompletionDate(e.target.value)}
+                className="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                required
+              />
+            </div>
+            {/* Project Location */}
+            <div>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Project Location
+              </label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
                 className="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200"
                 required
               />
@@ -316,21 +361,25 @@ const Dashboard: React.FC = () => {
               <textarea
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                className="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 resize-none"
+                className={`w-full bg-gray-50 border-2 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-200 resize-none ${
+                  isRemarkValid ? "border-gray-200" : "border-red-500"
+                }`}
                 required
-              />{" "}
-            </div>{" "}
+              />
+              <span>Remark must be of 250 characters</span>
+            </div>
             {/* Submit Button */}
             <button
               type="submit"
               className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition-all duration-300"
             >
-              Add Service{" "}
+              Add Service
             </button>
-          </form>{" "}
+          </form>
         </Modal>
-      </div>{" "}
+      </div>
     </div>
   );
 };
+
 export default Dashboard;
