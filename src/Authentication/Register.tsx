@@ -86,6 +86,7 @@ const Register: React.FC = () => {
   const [validation, setValidation] = useState<FormValidation>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  //@ts-ignore
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false); // Track if user accepted the disclaimer
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false); // Modal to show disclaimer
   const navigate = useNavigate();

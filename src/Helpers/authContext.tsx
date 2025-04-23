@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (type === "Participant") {
         route = "/profile";
         setUser(userData.participant); // Ensure user data is set here
-        console.log("userdata in context after login:", userData.participant); // ✅ log the actual user
+        // console.log("userdata in context after login:", userData.participant); // ✅ log the actual user
       } else if (type === "Service Provider") {
         route = "/dashboard/service_provider";
         setUser(userData.serviceProvider);
@@ -141,7 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    console.log("User data changed:", user);
+    // console.log("User data changed:", user);
   }, [user]); 
 
   useEffect(() => {

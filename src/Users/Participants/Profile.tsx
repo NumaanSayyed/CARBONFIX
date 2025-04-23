@@ -18,6 +18,7 @@ const Profile: React.FC = () => {
   // @ts-ignore
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showLevelUpModal, setShowLevelUpModal] = useState(false);
+  //@ts-ignore
   const [isMobile, setIsMobile] = useState(false);
   // @ts-ignore
   const [projectStats, setprojectstats] = useState({
@@ -151,6 +152,7 @@ const Profile: React.FC = () => {
 };
 
 const badgeInfo = getBadgeInfo(credits);
+//@ts-ignore
 const addCredits = () => {
     const previousBadge = getBadgeInfo(credits).type;
     const newCredits = credits + 50;

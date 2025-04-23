@@ -9,7 +9,7 @@ import { backend_url } from "../backend_route";
 import { useLocation } from "react-router-dom";
 
 const Testimonial: React.FC = () => {
-  console.log("Testimonial component render. user and location:", useAuth().user, useLocation().pathname);
+  // console.log("Testimonial component render. user and location:", useAuth().user, useLocation().pathname);
 
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
@@ -20,7 +20,7 @@ const Testimonial: React.FC = () => {
 
 
   useEffect(() => {
-    console.log("Testimonial useEffect triggered. user:", user, "location.pathname:", location.pathname);
+    // console.log("Testimonial useEffect triggered. user:", user, "location.pathname:", location.pathname);
     if (user) {
       fetchFeedbacks();
       
@@ -32,7 +32,7 @@ const Testimonial: React.FC = () => {
 
   useEffect(() => {
     const handleFocus = () => {
-      console.log("Window focus event triggered");
+      // console.log("Window focus event triggered");
       if (user) {
         checkFeedbackStatus();
       }
@@ -77,7 +77,7 @@ const Testimonial: React.FC = () => {
 
   // Optional: Log the value of hasGivenFeedback to check if it's being updated correctly
   useEffect(() => {
-    console.log("hasGivenFeedback value updated:", hasGivenFeedback);
+    // console.log("hasGivenFeedback value updated:", hasGivenFeedback);
   }, [hasGivenFeedback]);
 
   return (
@@ -164,7 +164,9 @@ const TestimonialCard: React.FC<{ testimonial: any }> = ({ testimonial }) => (
 const ReviewForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [rating, setRating] = useState(0);
   const [message, setMessage] = useState("");
+  //@ts-ignore
   const [error, setError] = useState<string | null>(null);
+  //@ts-ignore
   const [success, setSuccess] = useState<string | null>(null);
   const [isMessageValid, setIsMessageValid] = useState(true);
   const { user } = useAuth();

@@ -6,6 +6,7 @@ const MedalProgress: React.FC = () => {
   const [activeLevel, setActiveLevel] = useState<string>("Bronze");
 
   // User's current credits
+  //@ts-ignore
   const [userCredits, setUserCredits] = useState<number>(35);
 
   // Medal level data
