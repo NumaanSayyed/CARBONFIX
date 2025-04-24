@@ -21,9 +21,9 @@ interface FormData {
   address: string;
   org_name?: string;
   org_type?: string[];
-  collegeName?: string;
-  principalName?: string;
-  deputyName?: string;
+  college_name?: string;
+  principal_name?: string;
+  deputy_name?: string;
   licenseNumber?: string;
 }
 
@@ -60,7 +60,7 @@ const roles = [
     description: "Register as a service provider",
     bgImage:
       "https://public.readdy.ai/ai/img_res/ef2d258638c75e806ecee1043adf2c5b.jpg",
-  }
+  },
 ];
 
 const Register: React.FC = () => {
@@ -77,18 +77,19 @@ const Register: React.FC = () => {
     address: "",
     org_name: "",
     org_type: [],
-    collegeName: "",
-    principalName: "",
-    deputyName: "",
+    college_name: "",
+    principal_name: "",
+    deputy_name: "",
     licenseNumber: "",
   });
 
   const [validation, setValidation] = useState<FormValidation>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [otpVerified, setOtpverified] = useState(false);
   //@ts-ignore
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false); // Track if user accepted the disclaimer
-  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false); // Modal to show disclaimer
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -137,10 +138,9 @@ const Register: React.FC = () => {
   const submitRegistration = async () => {
     let isValid = true;
     const requiredFields = ["email", "password", "first_name", "last_name"];
-
-    if (selectedRole !== "admin") {
-      requiredFields.push("phone");
-    }
+    if (selectedRole !== "admin") requiredFields.push("phone");
+    if (selectedRole === "college")
+      requiredFields.push("college_name", "principal_name", "deputy_name");
 
     requiredFields.forEach((field) => {
       if (!formData[field as keyof FormData]) {
@@ -159,7 +159,7 @@ const Register: React.FC = () => {
     if (selectedRole === "participant") {
       endpoint = `${backend_url}/participants/register`;
     } else if (selectedRole === "college") {
-      endpoint = `${backend_url}/colleges/register`;
+      endpoint = `${backend_url}/college/register`;
     } else if (selectedRole === "provider") {
       endpoint = `${backend_url}/serviceProviders/register`;
     }
@@ -190,7 +190,11 @@ const Register: React.FC = () => {
             ? "College"
             : "admin";
 
-        const route = await login(formData.email, formData.password, formattedRole);
+        const route = await login(
+          formData.email,
+          formData.password,
+          formattedRole
+        );
         navigate(route);
       }
     } catch (error: any) {
@@ -213,12 +217,12 @@ const Register: React.FC = () => {
   const handleDisclaimerAccept = () => {
     setDisclaimerAccepted(true);
     setIsInfoModalOpen(false);
-    submitRegistration(); // Proceed with form submission after accepting the disclaimer
+    submitRegistration();
   };
 
   const handleDisclaimerReject = () => {
     setDisclaimerAccepted(false);
-    setIsInfoModalOpen(false); // Don't proceed with the registration
+    setIsInfoModalOpen(false);
   };
 
   return (
@@ -232,9 +236,7 @@ const Register: React.FC = () => {
           {roles.map((role) => (
             <div
               key={role.id}
-              onClick={() => {
-                setSelectedRole(role.id);
-              }}
+              onClick={() => setSelectedRole(role.id)}
               className={`relative cursor-pointer transform transition-all duration-300 hover:scale-105 ${
                 selectedRole === role.id
                   ? "ring-2 ring-blue-500 shadow-lg"
@@ -259,18 +261,21 @@ const Register: React.FC = () => {
           ))}
         </div>
 
-        <button className="border border-gray-500 px-6 py-3 rounded-md text-white bg-green-600 hover:bg-green-700 transition-all"
-        onClick={() =>
-          navigate("/admin/login")
-        }
-        >Admin Login</button>
+        <button
+          className="border border-gray-500 px-6 py-3 rounded-md text-white bg-green-600 hover:bg-green-700 transition-all"
+          onClick={() => navigate("/admin/login")}
+        >
+          Admin Login
+        </button>
 
         {selectedRole && (
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <CommonFields
               formData={formData}
-              userRole={selectedRole}
               setFormData={setFormData}
+              userRole={selectedRole}
+              otpVerified={otpVerified}
+              setOtpVerified={setOtpverified}
             />
             {selectedRole === "participant" && (
               <ParticipantForm formData={formData} setFormData={setFormData} />
@@ -279,16 +284,25 @@ const Register: React.FC = () => {
               <CollegeForm formData={formData} setFormData={setFormData} />
             )}
             {selectedRole === "provider" && (
-              <ServiceProviderForm formData={formData} setFormData={setFormData} />
+              <ServiceProviderForm
+                formData={formData}
+                setFormData={setFormData}
+              />
             )}
 
             <button
               type="submit"
-              onClick={ () =>
-                selectedRole == "participant" ? 
-                 setIsInfoModalOpen(true) : submitRegistration()
+              onClick={() =>
+                selectedRole === "participant"
+                  ? setIsInfoModalOpen(true)
+                  : submitRegistration()
               }
-              className="w-full bg-blue-500 text-white font-semibold py-3 rounded-lg"
+              className={`w-full font-semibold py-3 rounded-lg text-white ${
+                otpVerified
+                  ? "bg-blue-500 hover:bg-blue-600"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
+              disabled={!otpVerified}
             >
               Register
             </button>
@@ -299,9 +313,13 @@ const Register: React.FC = () => {
         {isInfoModalOpen && (
           <div className="fixed inset-0 bg-gray-900 bg-opacity-60 flex justify-center items-center transition-opacity">
             <div className="bg-gradient-to-br mr-2 ml-2 from-indigo-600 to-blue-600 p-8 rounded-xl max-w-lg w-full shadow-2xl">
-              <h3 className="text-2xl font-bold text-white mb-4">Heads Up! 🚨</h3>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Heads Up! 🚨
+              </h3>
               <p className="text-white text-lg mb-6">
-                This event is virtual. The credit you earn is virtual and not physical—there are no tangible rewards or benefits. But hey, you still get to be part of something cool!
+                This event is virtual. The credit you earn is virtual and not
+                physical—there are no tangible rewards or benefits. But hey, you
+                still get to be part of something cool!
               </p>
               <div className="flex justify-center gap-6">
                 <button
@@ -321,7 +339,7 @@ const Register: React.FC = () => {
           </div>
         )}
 
-        {/* Modal for Form Status */}
+        {/* Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg max-w-sm mx-auto">

@@ -14,7 +14,7 @@ const Homepage: React.FC = () => {
   const [targetStats, setTargetStats] = useState({
     participants: 0,
     carbonCredits: 0,
-    college: 0, // clg
+    college: 0,
     servicePro: 0,
   });
 
@@ -66,9 +66,7 @@ const Homepage: React.FC = () => {
           carbonCredits: Math.round(
             (targetStats.carbonCredits / steps) * currentStep
           ),
-          college: Math.round(
-            (targetStats.college / steps) * currentStep
-          ),
+          college: Math.round((targetStats.college / steps) * currentStep),
           servicePro: Math.round(
             (targetStats.servicePro / steps) * currentStep
           ),
@@ -76,13 +74,13 @@ const Homepage: React.FC = () => {
 
         currentStep += 1;
       } else {
-        setStats(targetStats); 
+        setStats(targetStats);
         clearInterval(counter);
       }
     }, interval);
 
     return () => clearInterval(counter);
-  }, [targetStats]); 
+  }, [targetStats]);
 
   return (
     <>
@@ -107,9 +105,9 @@ const Homepage: React.FC = () => {
       <FeaturedProjects />
 
       {/* Testimonials Section */}
-      <Testimonials />
+      <Testimonials key={location.pathname} />
 
-      <MedalProgress/>
+      <MedalProgress />
 
       <FAQ />
     </>

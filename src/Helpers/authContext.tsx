@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         endpoint = `${backend_url}/serviceProviders/login`;
         break;
       case "College":
-        endpoint = `${backend_url}/colleges/login`;
+        endpoint = `${backend_url}/college/login`;
         break;
       case "admin":
         endpoint = `${backend_url}/admin/login`;
@@ -71,13 +71,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (type === "Participant") {
         route = "/profile";
-        setUser(userData.participant); // Ensure user data is set here
-        // console.log("userdata in context after login:", userData.participant); // ✅ log the actual user
+        setUser(userData.participant);
       } else if (type === "Service Provider") {
         route = "/dashboard/service_provider";
         setUser(userData.serviceProvider);
       } else if (type === "admin") {
         route = "/dashboard/admin";
+      } else if (type === "College") {
+        route = "/";
       }
 
       localStorage.setItem(
@@ -142,18 +143,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     // console.log("User data changed:", user);
-  }, [user]); 
+  }, [user]);
 
   useEffect(() => {
     const data = getWithExpirationCheck("user");
     const userType = localStorage.getItem("userType");
-  
+
     if (data && userType) {
       setUser(data);
       setUserType(userType);
     }
   }, []);
-  
 
   return (
     <AuthContext.Provider

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../Helpers/authContext"; // 👈 Import context
+import { useAuth } from "../Helpers/authContext";
+import axios from "axios";
+import { backend_url } from "../backend_route";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -8,6 +10,13 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotRole, setForgotRole] = useState("participant");
+  const [forgotOtp, setForgotOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [userType, setUserType] = useState("Participant");
@@ -15,15 +24,15 @@ const Login: React.FC = () => {
   const [modalMessage, setModalMessage] = useState("");
 
   const navigate = useNavigate();
-   // @ts-ignore
-  const { login, profileRoute } = useAuth(); // 👈 Get login and route from context
+  // @ts-ignore
+  const { login, profileRoute } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const route = await login(email, password, userType); // 👈 get route from login
+      const route = await login(email, password, userType);
       navigate(route); // 👈 Navigate after login
     } catch (error: any) {
       if (error.response) {
@@ -41,6 +50,82 @@ const Login: React.FC = () => {
     }
   };
 
+  const sendResetOTP = async () => {
+    try {
+      setLoading(true);
+      console.log("genereate email : ", forgotEmail);
+      console.log("generate role : ", forgotRole);
+
+      //@ts-ignore
+      const res = await axios.post(
+        `${backend_url}/password-reset/generate-otp`,
+        {
+          email: forgotEmail,
+          role: forgotRole,
+        }
+      );
+
+      console.log("genereate email : ", forgotEmail);
+      console.log("generate role : ", forgotRole);
+
+      setOtpSent(true);
+    } catch (err: any) {
+      setModalMessage(err.response?.data?.error || "Failed to send OTP");
+      setIsModalOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOTP = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.post(`${backend_url}/password-reset/verify-otp`, {
+        email: forgotEmail,
+        role: forgotRole,
+        otp: forgotOtp,
+      });
+
+      console.log("verify-otp email :", forgotEmail);
+      console.log("verify otp role :", forgotRole);
+      console.log("verify otp otp : ", forgotOtp);
+
+      setOtpVerified(true);
+      setResetToken(res.data.resetToken);
+      setModalMessage(res.data.message);
+      setIsModalOpen(true);
+    } catch (err: any) {
+      setModalMessage(err.response?.data?.error || "OTP verification failed");
+      setIsModalOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setModalMessage("Passwords do not match.");
+      setIsModalOpen(true);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await axios.post(`${backend_url}/password-reset/reset`, {
+        token: resetToken,
+        newPassword,
+      });
+      setResetSuccess(true);
+    } catch (err: any) {
+      setModalMessage(err.response?.data?.error || "Password reset failed");
+      setIsModalOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //@ts-ignore
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -144,15 +229,7 @@ const Login: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                {/* <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-emerald-500 border-gray-300 rounded focus:ring-emerald-500"
-                /> */}
-                {/* <span className="ml-2 text-sm text-gray-600">Remember me</span> */}
-              </label>
+              <label className="flex items-center"></label>
               <button
                 type="button"
                 onClick={() => setShowForgotModal(true)}
@@ -187,7 +264,6 @@ const Login: React.FC = () => {
         </div>
       </div>
 
-      {/* Forgot Password Modal */}
       {showForgotModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
@@ -199,6 +275,10 @@ const Login: React.FC = () => {
                 onClick={() => {
                   setShowForgotModal(false);
                   setResetSuccess(false);
+                  setOtpSent(false);
+                  setOtpVerified(false);
+                  setResetToken("");
+                  setForgotOtp("");
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -207,43 +287,95 @@ const Login: React.FC = () => {
             </div>
 
             {!resetSuccess ? (
-              <form onSubmit={handleForgotPassword}>
-                <p className="text-gray-600 mb-6">
-                  Enter your email address and we'll send you instructions to
-                  reset your password.
-                </p>
-                <div className="mb-6">
+              !otpVerified ? (
+                <>
+                  <p className="text-gray-600 mb-4">
+                    Enter your email and select role to get an OTP.
+                  </p>
+                  <select
+                    className="w-full mb-4 px-4 py-2 border border-gray-200 rounded-lg"
+                    value={forgotRole}
+                    onChange={(e) => setForgotRole(e.target.value)}
+                  >
+                    <option value="participant">Participant</option>
+                    <option value="service_provider">Service Provider</option>
+                    <option value="college">College</option>
+                  </select>
                   <input
                     type="email"
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter your email"
                     required
+                    className="w-full px-4 py-2 mb-4 border border-gray-200 rounded-lg"
                   />
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="!rounded-button w-full bg-emerald-500 text-white py-3 px-4 font-medium hover:bg-emerald-600 transition-colors flex items-center justify-center"
-                >
-                  {loading ? (
-                    <i className="fas fa-circle-notch fa-spin"></i>
-                  ) : (
-                    "Send Reset Instructions"
+                  {!otpSent && (
+                    <button
+                      type="button"
+                      onClick={sendResetOTP}
+                      disabled={loading}
+                      className="w-full mb-2 bg-emerald-500 text-white py-2 px-4 rounded-lg"
+                    >
+                      {loading ? "Sending OTP..." : "Generate OTP"}
+                    </button>
                   )}
-                </button>
-              </form>
+
+                  {otpSent && (
+                    <>
+                      <input
+                        type="text"
+                        value={forgotOtp}
+                        onChange={(e) => setForgotOtp(e.target.value)}
+                        placeholder="Enter OTP"
+                        className="w-full px-4 py-2 mb-4 border border-gray-200 rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={verifyOTP}
+                        className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg"
+                      >
+                        Verify OTP
+                      </button>
+                    </>
+                  )}
+                </>
+              ) : (
+                <form onSubmit={resetPassword}>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="New Password"
+                    className="w-full px-4 py-2 mb-4 border border-gray-200 rounded-lg"
+                    required
+                  />
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm Password"
+                    className="w-full px-4 py-2 mb-4 border border-gray-200 rounded-lg"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="w-full bg-green-500 text-white py-2 px-4 rounded-lg"
+                    disabled={loading}
+                  >
+                    {loading ? "Resetting..." : "Reset Password"}
+                  </button>
+                </form>
+              )
             ) : (
               <div className="text-center">
                 <div className="text-emerald-500 text-5xl mb-4">
                   <i className="fas fa-check-circle"></i>
                 </div>
                 <h4 className="text-xl font-bold text-gray-800 mb-2">
-                  Check Your Email
+                  Password Reset Successful
                 </h4>
                 <p className="text-gray-600">
-                  We've sent password reset instructions to your email address.
+                  You can now log in with your new password.
                 </p>
               </div>
             )}

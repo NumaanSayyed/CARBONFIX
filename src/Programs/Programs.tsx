@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { backend_url } from "../backend_route";
 import { useAuth } from "../Helpers/authContext";
-import { getWithExpirationCheck } from "../Helpers/Helpers";
+//@ts-ignore
+import { apiResponse, getWithExpirationCheck } from "../Helpers/Helpers";
 import { useNavigate } from "react-router-dom";
 
 const Project: React.FC = () => {
@@ -72,8 +73,6 @@ const Project: React.FC = () => {
         participant_id: participantId,
         project_id: selectedProject.id,
       });
-
-      // if(response.data.message == "Enrollment request already exists")
 
       if (
         response.data.message === "Enrollment request submitted successfully"
@@ -174,7 +173,6 @@ const Project: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => {
-            // 🎯 Custom logic to determine progress based only on total participants
             const participants = project.total_participants || 0;
             let progress = 0;
             if (participants > 75) progress = 100;
@@ -364,7 +362,6 @@ const Project: React.FC = () => {
             <div className="flex space-x-4">
               <button
                 onClick={() => {
-                  // Handle the "Join Other Project" logic
                   closeModals();
                 }}
                 className="flex-1 bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300"
@@ -374,8 +371,8 @@ const Project: React.FC = () => {
 
               <button
                 onClick={() => {
-                  navigate("/profile"); // Navigate to profile/dashboard page
                   closeModals();
+                  user ? navigate("/profile") : navigate("/login");
                 }}
                 className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300"
               >

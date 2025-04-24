@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../Helpers/authContext"; // ✅ AuthContext import
+import { useAuth } from "../Helpers/authContext";
 import { getWithExpirationCheck } from "../Helpers/Helpers";
 
 interface HeaderProps {
@@ -21,12 +21,9 @@ const Header: React.FC<HeaderProps> = ({
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
-  const {
-    isAuthenticated,
-    userType,
-    profileRoute,
-    logout,
-  } = useAuth();
+  const { isAuthenticated, userType, profileRoute, logout } = useAuth();
+
+  const resolvedUserType = getWithExpirationCheck("userType") || userType;
 
   useEffect(() => {
     setNavbarTextColor(
@@ -37,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({
   }, [isScrolled, location.pathname]);
 
   function handleLogout() {
-    logout(); // ✅ use context logout
+    logout();
     setActiveNav("projects");
     navigate("/login");
   }
@@ -95,7 +92,7 @@ const Header: React.FC<HeaderProps> = ({
               Home
             </Link>
 
-            {userType !== "Service Provider" && (
+            {resolvedUserType !== "Service Provider" && (
               <Link
                 to="/project"
                 onClick={() => setActiveNav("projects")}
@@ -121,15 +118,18 @@ const Header: React.FC<HeaderProps> = ({
 
                 {profileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-40 bg-white rounded shadow-lg z-50">
-                    <Link
-                      to={profileRoute}
-                      onClick={() => setProfileMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-100"
-                    >
-                      {userType === "Service Provider" || getWithExpirationCheck("userType") === "admin"
-                        ? "Dashboard"
-                        : "Profile"}
-                    </Link>
+                    {resolvedUserType !== "College" && (
+                      <Link
+                        to={profileRoute}
+                        onClick={() => setProfileMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-100"
+                      >
+                        {resolvedUserType === "Service Provider" ||
+                        resolvedUserType === "admin"
+                          ? "Dashboard"
+                          : "Profile"}
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         handleLogout();
@@ -189,7 +189,7 @@ const Header: React.FC<HeaderProps> = ({
                   Home
                 </Link>
 
-                {userType !== "Service Provider" && (
+                {resolvedUserType !== "Service Provider" && (
                   <Link
                     to="/project"
                     onClick={() => {
@@ -204,14 +204,19 @@ const Header: React.FC<HeaderProps> = ({
 
                 {isAuthenticated ? (
                   <>
-                    <Link
-                      to={profileRoute}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg whitespace-nowrap"
-                    >
-                      <i className="fas fa-user mr-2"></i>
-                      {userType === "Service Provider" || getWithExpirationCheck("userType") === "admin" ? "Dashboard" : "Profile"}
-                    </Link>
+                    {resolvedUserType !== "College" && (
+                      <Link
+                        to={profileRoute}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg whitespace-nowrap"
+                      >
+                        <i className="fas fa-user mr-2"></i>
+                        {resolvedUserType === "Service Provider" ||
+                        resolvedUserType === "admin"
+                          ? "Dashboard"
+                          : "Profile"}
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         handleLogout();

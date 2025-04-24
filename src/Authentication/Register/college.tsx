@@ -2,9 +2,9 @@ import React from "react";
 
 interface CollegeFormProps {
   formData: {
-    collegeName?: string;
-    principalName?: string;
-    deputyName?: string;
+    college_name?: string;
+    principal_name?: string;
+    deputy_name?: string;
   };
   setFormData: React.Dispatch<React.SetStateAction<any>>;
 }
@@ -23,9 +23,9 @@ const CollegeForm: React.FC<CollegeFormProps> = ({ formData, setFormData }) => {
         </label>
         <input
           type="text"
-          name="collegeName"
+          name="college_name"
           className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={formData.collegeName}
+          value={formData.college_name}
           onChange={handleInputChange}
         />
       </div>
@@ -37,9 +37,9 @@ const CollegeForm: React.FC<CollegeFormProps> = ({ formData, setFormData }) => {
           </label>
           <input
             type="text"
-            name="principalName"
+            name="principal_name"
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            value={formData.principalName}
+            value={formData.principal_name}
             onChange={handleInputChange}
           />
         </div>
@@ -49,9 +49,9 @@ const CollegeForm: React.FC<CollegeFormProps> = ({ formData, setFormData }) => {
           </label>
           <input
             type="text"
-            name="deputyName"
+            name="deputy_name"
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            value={formData.deputyName}
+            value={formData.deputy_name}
             onChange={handleInputChange}
           />
         </div>
