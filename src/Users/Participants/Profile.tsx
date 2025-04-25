@@ -311,13 +311,13 @@ const Profile: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen ${
-        isDarkMode
-          ? "bg-gray-900"
-          : "bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
-      } transition-colors duration-300 pt-8`}
-    >
-      <div className={`max-w-7xl px-4 sm:px-6 lg:px- py-12`}>
+    className={`min-h-screen ${
+      isDarkMode
+        ? "bg-gray-900"
+        : "bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
+    } transition-colors duration-300 pt-8`}
+  >
+    <div className={`max-w-7xl px-4 sm:px-6 lg:px-8 py-12 mx-auto`}>
         <div
           // style={{paddingTop:"40px"}}
           className={`${
