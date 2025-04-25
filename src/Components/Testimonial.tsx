@@ -17,7 +17,8 @@ const Testimonial: React.FC = () => {
   const [hasGivenFeedback, setHasGivenFeedback] = useState<boolean | null>(
     null
   );
-
+  
+  //@ts-ignore
   const resolvedUserType = getWithExpirationCheck("userType") || userType;
 
   useEffect(() => {
