@@ -10,18 +10,36 @@ import { useLocation } from "react-router-dom";
 
 const Testimonial: React.FC = () => {
   const { user } = useAuth();
+  const {userType} = useAuth();
+
   const [showForm, setShowForm] = useState(false);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [hasGivenFeedback, setHasGivenFeedback] = useState<boolean | null>(
     null
   );
 
+  const resolvedUserType = getWithExpirationCheck("userType") || userType;
+
+  useEffect(() => {
+    console.log("User in Testimonial:", user);
+    const userType = getWithExpirationCheck("userType");
+    console.log("User type is:", userType);
+    fetchFeedbacks();
+    checkFeedbackStatus();
+  }, [user]);  
+
   const location = useLocation();
 
   useEffect(() => {
-    fetchFeedbacks();
-    checkFeedbackStatus();
-  }, [user, location.pathname]);
+    console.log("Humaira in useEffect user type is ",userType);
+    console.log("User changed:", user);
+    console.log("user ID:", user?.id);
+
+    if (user?.id || user?.id) {
+      fetchFeedbacks();
+      checkFeedbackStatus();
+    }
+  }, [user?.id, user?.id, location.pathname]);
 
   useEffect(() => {
     const handleFocus = () => {
@@ -43,24 +61,67 @@ const Testimonial: React.FC = () => {
     }
   };
 
+  // const checkFeedbackStatus = async () => {
+  //   if (!user) {
+  //     setHasGivenFeedback(null);
+  //     return;
+  //   }
+
+  //   const participantId = user?.id;
+  //   const serviceProviderId = user?.id;
+
+  //   console.log("user id in status function",participantId);
+  //   console.log("user id in status function ",serviceProviderId);
+
+  //   if (!participantId && !serviceProviderId) {
+  //     setHasGivenFeedback(null);
+  //     return;
+  //   }
+
+  //   const params: {
+  //     participant_id?: string;
+  //     service_provider_id?: string;
+  //   } = {};
+
+  //   if (participantId) {
+  //     params.participant_id = participantId;
+  //   } else if (serviceProviderId) {
+  //     params.service_provider_id = serviceProviderId;
+  //   }
+
+  //   try {
+  //     const response = await axios.get(`${backend_url}/feedback/status`, {
+  //       params,
+  //     });
+  //     setHasGivenFeedback(response.data.hasGivenFeedback);
+  //   } catch (error) {
+  //     console.error("Error checking feedback status:", error);
+  //     setHasGivenFeedback(null);
+  //   }
+  // };
+
   const checkFeedbackStatus = async () => {
-    if (!user) {
+    if (!user || !user.id) {
       setHasGivenFeedback(null);
       return;
     }
-
-    const params: { participant_id?: string; service_provider_id?: string } =
-      {};
-
-    if (user.participant?.id) {
-      params.participant_id = user.participant.id;
-    } else if (user.serviceProvider?.id) {
-      params.service_provider_id = user.serviceProvider.id;
+  
+    const resolvedUserType = getWithExpirationCheck("userType") || userType;
+  
+    const params: {
+      participant_id?: string;
+      service_provider_id?: string;
+    } = {};
+  
+    if (resolvedUserType === "Participant") {
+      params.participant_id = user.id;
+    } else if (resolvedUserType === "Service Provider") {
+      params.service_provider_id = user.id;
     } else {
       setHasGivenFeedback(null);
       return;
     }
-
+  
     try {
       const response = await axios.get(`${backend_url}/feedback/status`, {
         params,
@@ -71,6 +132,7 @@ const Testimonial: React.FC = () => {
       setHasGivenFeedback(null);
     }
   };
+  
 
   return (
     <div className="container mx-auto px-6 py-24 bg-gradient-to-b from-green-50 to-white">

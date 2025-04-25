@@ -5,35 +5,28 @@ import { apiResponse } from "../../Helpers/Helpers";
 
 const VerificationTable: React.FC = () => {
   const [showProofModal, setShowProofModal] = useState(false);
-  const [proofContent, setProofContent] = useState<{
-    imageUrl: string | null;
-    videoUrl: string | null;
-    description: string;
-  } | null>(null);
+  const [proofContent, setProofContent] = useState<any | null>(null);
   const [enrollments, setEnrollments] = useState<any[]>([]);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedProofId, setSelectedProofId] = useState<string | null>(null);
+  const [rejectRemark, setRejectRemark] = useState("");
 
   const getWithExpirationCheck = (key: string) => {
     const dataString = localStorage.getItem(key);
     if (!dataString) return null;
-
     const data = JSON.parse(dataString);
     const currentTime = new Date().getTime();
-
     if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key); // Remove expired item
-      return null; // Item expired
+      localStorage.removeItem(key);
+      return null;
     }
-
-    return data.value; // Item is still valid
+    return data.value;
   };
 
-  // Approve proof function
   const approveProof = async (proofId: string, remark: string) => {
     try {
       const token = getWithExpirationCheck("token");
       const response = await axios.patch(
-        // /proofs/:proofId/reject
-        // /proofs/:proofId/approve
         `${backend_url}/admin/proofs/${proofId}/approve`,
         { remark },
         {
@@ -42,34 +35,31 @@ const VerificationTable: React.FC = () => {
           },
         }
       );
-
-      // alert(response.data.message); // Notify the admin/
-      apiResponse(response.data.message, "bg-green-500");
-      // Refresh the data after approval
+      apiResponse(response.data.message || "Proof approved ", "bg-green-500");
       fetchProofsForAdmin();
     } catch (error) {
       console.error("Error approving proof:", error);
     }
   };
 
-  // Reject proof function
-  const rejectProof = async (proofId: string, remark: string) => {
+  const rejectProof = async () => {
     try {
+      if (!selectedProofId || rejectRemark.trim() === "") return;
+
       const token = getWithExpirationCheck("token");
       const response = await axios.patch(
-        `${backend_url}/admin/proofs/${proofId}/reject`,
-        { remark },
+        `${backend_url}/admin/proofs/${selectedProofId}/reject`,
+        { remark: rejectRemark },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      // alert(response.data.message); // Notify the admin
-      apiResponse(response.data.message, "bg-red-500");
-
-      // Refresh the data after rejection
+      apiResponse(response.data.message || "Proof rejected", "bg-red-500");
+      setShowRejectModal(false);
+      setRejectRemark("");
+      setSelectedProofId(null);
       fetchProofsForAdmin();
     } catch (error) {
       console.error("Error rejecting proof:", error);
@@ -84,9 +74,8 @@ const VerificationTable: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      if (response.data && response.data.data) {
-        const formattedData = response.data.data.map((proof: any) => ({
+      if (response.data?.data) {
+        const formatted = response.data.data.map((proof: any) => ({
           id: proof.id,
           project_name: proof.project_name,
           participant_first_name: proof.first_name,
@@ -96,8 +85,7 @@ const VerificationTable: React.FC = () => {
           proofVideo: proof.video_url || proof.video_path,
           description: proof.remark || "No description",
         }));
-
-        setEnrollments(formattedData);
+        setEnrollments(formatted);
       }
     } catch (error) {
       console.error("Error fetching proofs for admin:", error);
@@ -109,22 +97,55 @@ const VerificationTable: React.FC = () => {
   }, []);
 
   const openProofModal = (proof: any) => {
-    console.log("Selected Proof:", proof); // Debugging
-    console.log(proof.proofImage);
-
-    // Set proof content
     setProofContent({
       imageUrl: proof.proofImage || null,
       videoUrl: proof.proofVideo || null,
       description: proof.remark || "No description",
     });
-
-    // Open the proof modal
     setShowProofModal(true);
+  };
+
+  const openRejectModal = (proofId: string) => {
+    setSelectedProofId(proofId);
+    setRejectRemark("");
+    setShowRejectModal(true);
   };
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-12">
+      {/* Reject Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              Enter Rejection Remark
+            </h2>
+            <textarea
+              rows={4}
+              className="w-full p-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-red-400"
+              placeholder="Enter reason for rejection..."
+              value={rejectRemark}
+              onChange={(e) => setRejectRemark(e.target.value)}
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setShowRejectModal(false)}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={rejectProof}
+                disabled={rejectRemark.trim() === ""}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Proof Modal */}
       {showProofModal && proofContent && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -132,19 +153,11 @@ const VerificationTable: React.FC = () => {
             <h3 className="text-xl text-center text-gray-800 mb-4">
               Proof Content
             </h3>
-
-            {/* Show Image */}
             {proofContent.imageUrl && (
               <div className="mb-4">
-                <img
-                  src={proofContent.imageUrl}
-                  alt="Proof"
-                  className="w-full h-auto"
-                />
+                <img src={proofContent.imageUrl} alt="Proof" className="w-full h-auto" />
               </div>
             )}
-
-            {/* Show Video */}
             {proofContent.videoUrl && (
               <div className="mb-4">
                 <video controls className="w-full h-auto">
@@ -153,10 +166,9 @@ const VerificationTable: React.FC = () => {
                 </video>
               </div>
             )}
-
             <button
               onClick={() => setShowProofModal(false)}
-              className="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition-colors duration-300 !rounded-button whitespace-nowrap mt-4"
+              className="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition-colors duration-300"
             >
               Close
             </button>
@@ -164,26 +176,21 @@ const VerificationTable: React.FC = () => {
         </div>
       )}
 
-      {/* Table */}
+      {/* Main Table */}
       <div className="overflow-x-auto relative">
         <table className="w-full table-auto">
           <thead className="sticky top-0 bg-white z-10 shadow-sm">
             <tr className="border-b border-gray-200">
-              {[
-                "S.No",
-                "Project Name",
-                "Participant Name",
-                "Status",
-                "Proofs",
-                "Action",
-              ].map((heading) => (
-                <th
-                  key={heading}
-                  className="text-left py-4 px-4 text-sm font-semibold text-gray-600"
-                >
-                  {heading}
-                </th>
-              ))}
+              {["S.No", "Project Name", "Participant Name", "Status", "Proofs", "Action"].map(
+                (heading) => (
+                  <th
+                    key={heading}
+                    className="text-left py-4 px-4 text-sm font-semibold text-gray-600"
+                  >
+                    {heading}
+                  </th>
+                )
+              )}
             </tr>
           </thead>
           <tbody>
@@ -194,7 +201,9 @@ const VerificationTable: React.FC = () => {
               >
                 <td className="py-4 px-4">{index + 1}</td>
                 <td className="py-4 px-4">{participant.project_name}</td>
-                <td className="py-4 px-4">{`${participant.participant_first_name} ${participant.participant_last_name}`}</td>
+                <td className="py-4 px-4">
+                  {`${participant.participant_first_name} ${participant.participant_last_name}`}
+                </td>
                 <td className="py-4 px-4">
                   <span
                     className={`px-3 py-1 rounded-full text-sm ${
@@ -208,7 +217,6 @@ const VerificationTable: React.FC = () => {
                     {participant.status}
                   </span>
                 </td>
-
                 <td className="py-4 px-4">
                   <button
                     onClick={() => openProofModal(participant)}
@@ -221,17 +229,13 @@ const VerificationTable: React.FC = () => {
                 <td className="py-4 px-4">
                   <div className="flex gap-2">
                     <button
-                      onClick={() =>
-                        approveProof(participant.id, "Approved by admin")
-                      }
+                      onClick={() => approveProof(participant.id, "Approved by admin")}
                       className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600"
                     >
                       <i className="fas fa-check mr-1"></i>Validate
                     </button>
                     <button
-                      onClick={() =>
-                        rejectProof(participant.id, "Rejected by admin")
-                      }
+                      onClick={() => openRejectModal(participant.id)}
                       className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
                     >
                       <i className="fas fa-times mr-1"></i>Reject

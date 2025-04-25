@@ -8,6 +8,7 @@ import axios from "axios";
 import "swiper/swiper-bundle.css";
 import { backend_url } from "../../backend_route";
 import { useNavigate } from "react-router-dom";
+import { getWithExpirationCheck } from "../../Helpers/Helpers";
 
 const swiperModules = [Pagination, Autoplay];
 const Profile: React.FC = () => {
@@ -46,49 +47,54 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     if (chartRef.current) {
-        const chart = echarts.init(chartRef.current);
-        const option = {
-            animation: false,
-            tooltip: {
-                trigger: 'item'
+      const chart = echarts.init(chartRef.current);
+      const option = {
+        animation: false,
+        tooltip: {
+          trigger: "item",
+        },
+        color: ["#10B981", "#6366F1", "#9CA3AF"],
+        series: [
+          {
+            name: "Project Status",
+            type: "pie",
+            radius: ["60%", "80%"],
+            avoidLabelOverlap: false,
+            label: {
+              show: false,
             },
-            color: ['#10B981', '#6366F1', '#9CA3AF'],
-            series: [
-                {
-                    name: 'Project Status',
-                    type: 'pie',
-                    radius: ['60%', '80%'],
-                    avoidLabelOverlap: false,
-                    label: {
-                        show: false
-                    },
-                    emphasis: {
-                        label: {
-                            show: false
-                        }
-                    },
-                    labelLine: {
-                        show: false
-                    },
-                    data: [
-                        { value: projectStats.completed, name: 'Completed' },
-                        { value: projectStats.pending, name: 'Pending' },
-                        { value: projectStats.enrolled - (projectStats.completed + projectStats.pending), name: 'In Progress' }
-                    ]
-                }
-            ]
-        };
-        chart.setOption(option);
-        const handleResize = () => {
-            chart.resize();
-        };
-        window.addEventListener('resize', handleResize);
-        return () => {
-            chart.dispose();
-            window.removeEventListener('resize', handleResize);
-        };
+            emphasis: {
+              label: {
+                show: false,
+              },
+            },
+            labelLine: {
+              show: false,
+            },
+            data: [
+              { value: projectStats.completed, name: "Completed" },
+              { value: projectStats.pending, name: "Pending" },
+              {
+                value:
+                  projectStats.enrolled -
+                  (projectStats.completed + projectStats.pending),
+                name: "In Progress",
+              },
+            ],
+          },
+        ],
+      };
+      chart.setOption(option);
+      const handleResize = () => {
+        chart.resize();
+      };
+      window.addEventListener("resize", handleResize);
+      return () => {
+        chart.dispose();
+        window.removeEventListener("resize", handleResize);
+      };
     }
-}, [projectStats]);
+  }, [projectStats]);
 
   // const getBadgeInfo = (creditAmount: number) => {
   //   if (creditAmount >= 2500) {
@@ -126,75 +132,63 @@ const Profile: React.FC = () => {
   // };
   const getBadgeInfo = (creditAmount: number) => {
     if (creditAmount >= 501) {
-        return {
-            type: 'Gold',
-            color: 'bg-yellow-400',
-            icon: 'fa-crown',
-            requirement: 501,
-            nextLevel: '∞'
-        };
+      return {
+        type: "Gold",
+        color: "bg-yellow-400",
+        icon: "fa-crown",
+        requirement: 501,
+        nextLevel: "∞",
+      };
     } else if (creditAmount >= 101) {
-        return {
-            type: 'Silver',
-            color: 'bg-gray-300',
-            icon: 'fa-medal',
-            requirement: 101,
-            nextLevel: 501
-        };
+      return {
+        type: "Silver",
+        color: "bg-gray-300",
+        icon: "fa-medal",
+        requirement: 101,
+        nextLevel: 501,
+      };
     }
     return {
-        type: 'Bronze',
-        color: 'bg-orange-400',
-        icon: 'fa-award',
-        requirement: 0,
-        nextLevel: 101
+      type: "Bronze",
+      color: "bg-orange-400",
+      icon: "fa-award",
+      requirement: 0,
+      nextLevel: 101,
     };
-};
+  };
 
-const badgeInfo = getBadgeInfo(credits);
-//@ts-ignore
-const addCredits = () => {
+  const badgeInfo = getBadgeInfo(credits);
+  //@ts-ignore
+  const addCredits = () => {
     const previousBadge = getBadgeInfo(credits).type;
     const newCredits = credits + 50;
     const newBadge = getBadgeInfo(newCredits).type;
     if (previousBadge !== newBadge) {
-        setPreviousBadgeType(previousBadge);
-        setBadgeAnimation(true);
-        setShowLevelUpModal(true);
-        const startValue = credits;
-        const endValue = newCredits;
-        const duration = 2000;
-        const steps = 60;
-        const stepValue = (endValue - startValue) / steps;
-        let currentStep = 0;
-        const timer = setInterval(() => {
-            if (currentStep < steps) {
-                setCredits(Math.round(startValue + stepValue * currentStep));
-                currentStep++;
-            } else {
-                setCredits(endValue);
-                clearInterval(timer);
-            }
-        }, duration / steps);
-        setTimeout(() => {
-            setBadgeAnimation(false);
-            setShowLevelUpModal(false);
-        }, 2000);
+      setPreviousBadgeType(previousBadge);
+      setBadgeAnimation(true);
+      setShowLevelUpModal(true);
+      const startValue = credits;
+      const endValue = newCredits;
+      const duration = 2000;
+      const steps = 60;
+      const stepValue = (endValue - startValue) / steps;
+      let currentStep = 0;
+      const timer = setInterval(() => {
+        if (currentStep < steps) {
+          setCredits(Math.round(startValue + stepValue * currentStep));
+          currentStep++;
+        } else {
+          setCredits(endValue);
+          clearInterval(timer);
+        }
+      }, duration / steps);
+      setTimeout(() => {
+        setBadgeAnimation(false);
+        setShowLevelUpModal(false);
+      }, 2000);
     } else {
-        setCredits(newCredits);
+      setCredits(newCredits);
     }
-};
-  
-  const getWithExpirationCheck = (key: string) => {
-    const dataString = localStorage.getItem(key);
-    if (!dataString) return null;
-    const data = JSON.parse(dataString);
-    const currentTime = new Date().getTime();
-    if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key);
-      return null;
-    }
-    return data.value;
   };
 
   const token = getWithExpirationCheck("token");
@@ -260,7 +254,7 @@ const addCredits = () => {
       const enrolledTotal = projectStats.enrolled || 0;
       const completed = projectStats.completed || 0;
       const pending = projectStats.pending || 0;
-    //   @ts-ignore
+      //   @ts-ignore
       const inProgress = Math.max(enrolledTotal - (completed + pending), 0);
 
       const option = {
@@ -323,8 +317,9 @@ const addCredits = () => {
           : "bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
       } transition-colors duration-300 pt-8`}
     >
-      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12`}>
+      <div className={`max-w-7xl px-4 sm:px-6 lg:px- py-12`}>
         <div
+          // style={{paddingTop:"40px"}}
           className={`${
             isDarkMode ? "bg-gray-800/90" : "bg-white/90"
           } rounded-xl backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] overflow-hidden transition-colors duration-300 border border-opacity-20 ${
@@ -339,10 +334,11 @@ const addCredits = () => {
             }}
           >
             <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-            <div className="relative h-full flex flex-col md:flex-row items-center justify-center md:justify-start px-4 md:px-8 space-y-4 md:space-y-0 md:space-x-8">
+            <div className="relative h-full flex  md:flex-row items-center justify-center md:justify-start px-4 md:px-8 space-y-4 md:space-y-0 md:space-x-8 text-center md:text-left">
+              {/* <div className="relative h-full flex flex-col md:flex-row items-center justify-center md:justify-start px-4 md:px-8 space-y-4 md:space-y-0 md:space-x-8"> */}
               <div className="relative group ">
                 <div
-                  className={`w-24 h-24 md:w-32 md:h-32 rounded-full border-4 ${
+                  className={`w-24 h-24 md:w-32 md:h-32  [@media(max-width:770px)]:h-20 [@media(max-width:770px)]:w-20  rounded-full border-4 ${
                     badgeInfo.color
                   } overflow-hidden transition-all duration-300 group-hover:scale-105 relative ${
                     badgeAnimation ? "animate-pulse" : ""
@@ -361,11 +357,13 @@ const addCredits = () => {
                   <div className="absolute -bottom-1 left-0 right-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent"></div>
                 </div>{" "}
               </div>
-              <div className="text-center md:text-left text-white">
+              {/* <div className="text-center md:text-left text-white"> */}
+              <div className="text-white w-full md:w-auto flex flex-col items-center md:items-start space-y-2">
                 <div className="flex flex-col md:flex-row items-center md:space-x-4">
-                  <h1 className="text-2xl md:text-3xl font-bold">
+                  <h1 className="text-2xl md:text-3xl font-bold break-words [@media(max-width:770px)]:text-xl">
                     {name} {lastname}
                   </h1>
+
                   <div
                     className={`mt-2 md:mt-0 ${
                       badgeInfo.color
@@ -382,13 +380,13 @@ const addCredits = () => {
                         badgeAnimation ? "animate-spin" : ""
                       }`}
                     ></i>
-                    <span className="font-bold text-lg tracking-wide">
+                    <span className="font-bold text-lg tracking-wide  [@media(max-width:770px)]:text-sm">
                       {badgeInfo.type}
                     </span>
                     <span className="text-sm opacity-75">Level</span>
                   </div>
                 </div>
-                <p className="text-black-600 mt-2">
+                <p className="text-black-600  mt-2  [@media(max-width:770px)]:text-sm pb-2 ">
                   {credits >= 4000
                     ? "A True Guardian of the Planet: Pioneering a Greener Tomorrow!"
                     : credits >= 2500
@@ -519,7 +517,9 @@ const addCredits = () => {
                       </span>
                     </div>{" "}
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Project Approval Pending</span>
+                      <span className="text-gray-600">
+                        Project Approval Pending
+                      </span>
                       <span className="text-2xl font-bold text-gray-400">
                         {projectStats.pending}
                       </span>
@@ -559,7 +559,12 @@ const addCredits = () => {
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">
                   Project Distribution
                 </h3>
-                <div ref={chartRef} className="w-full h-64"></div>
+                {/* <div ref={chartRef} className="w-full h-64"></div> */}
+                <div
+                  ref={chartRef}
+                  className="w-full h-64 md:h-80 sm:h-72 xs:h-60"
+                  style={{ minHeight: "16rem" }} // ensures consistent height even on very small devices
+                ></div>
               </div>
             </div>
             <div className="mt-8">

@@ -128,12 +128,14 @@ const Project: React.FC = () => {
       project.project_category?.toLowerCase() ===
         selectedCategory.toLowerCase();
 
-    const matchSearch =
-      searchQuery.trim() === "" ||
-      project.project_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.project_category
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase());
+
+    const trimmedQuery = searchQuery.trim().toLowerCase();
+
+const matchSearch =
+  trimmedQuery === "" ||
+  project.project_name?.toLowerCase().includes(trimmedQuery) ||
+  project.project_category?.toLowerCase().includes(trimmedQuery);
+
 
     return matchCategory && matchSearch;
   });
