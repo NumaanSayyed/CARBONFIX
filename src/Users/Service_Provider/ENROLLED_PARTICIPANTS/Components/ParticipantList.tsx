@@ -1,4 +1,5 @@
-// import React, { useState } from "react";
+// ParticipantList.tsx
+import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { backend_url } from "../../../../backend_route";
@@ -45,14 +46,13 @@ const getStatusColor = (status: string) => {
     case "proof-submitted":
       return "bg-indigo-100 text-indigo-800";
     case "rejected_by_admin":
-      return "bg-red-100 text-red-800"
+      return "bg-red-100 text-red-800";
     case "pending":
       return "bg-yellow-100 text-yellow-800";
     default:
       return "bg-gray-100 text-gray-800";
   }
 };
-
 
 const ParticipantList: React.FC<ParticipantListProps> = ({
   participants,
@@ -63,13 +63,11 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
   setShowUpdateModal,
   fetchParticipant,
 }) => {
-  // @ts-ignore
+  //@ts-ignore
   const navigate = useNavigate();
   const formatStandardDate = (dateString: string) => {
     return new Date(dateString).toISOString().split("T")[0];
   };
-// 
-  // const [status, setStatus] = useState("Pending");
 
   const getWithExpirationCheck = (key: string) => {
     const dataString = localStorage.getItem(key);
@@ -83,15 +81,27 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
     return data.value;
   };
 
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectRemark, setRejectRemark] = useState("");
+  const [participantToReject, setParticipantToReject] = useState<Participant | null>(null);
+
   const handleEnrollmentAction = async (
     enrollmentId: string,
-    action: "approved" | "rejected"
+    action: "approved" | "rejected",
+    remark?: string
   ) => {
     try {
       const token = getWithExpirationCheck("token");
+      const payload: any = {
+        enrollment_id: enrollmentId,
+        status: action,
+      };
+      if (action === "rejected" && remark) {
+        payload.remark = remark;
+      }
       const response = await axios.put(
         `${backend_url}/enroll/approve-reject`,
-        { enrollment_id: enrollmentId, status: action },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -105,6 +115,19 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
     } catch (error) {
       console.error(`Failed to ${action} enrollment:`, error);
       apiResponse(`Failed to ${action} enrollment`, "bg-red-500");
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectRemark.trim()) {
+      apiResponse("Remark is required to reject", "bg-red-500");
+      return;
+    }
+    if (participantToReject) {
+      await handleEnrollmentAction(participantToReject.id, "rejected", rejectRemark);
+      setShowRejectModal(false);
+      setRejectRemark("");
+      setParticipantToReject(null);
     }
   };
 
@@ -176,7 +199,6 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                     "Status",
                     "Credits Earned",
                     "Credits Allocated",
-
                     "Actions",
                   ].map((heading) => (
                     <th
@@ -239,7 +261,6 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                     </td>
                     <td className="px-6 py-4 text-sm font-medium">
                       <div className="flex space-x-2 items-center">
-                        {/* Eye icon always available for approved/rejected */}
                         {(participant.project_enroll_status === "approved" ||
                           participant.project_enroll_status === "rejected") && (
                           <button
@@ -254,8 +275,6 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                             <i className="fas fa-eye"></i>
                           </button>
                         )}
-
-                        {/* Tick icon to open credit modal if approved */}
                         {participant.project_enroll_status === "approved" && (
                           <button
                             onClick={(e) => {
@@ -275,8 +294,6 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                             <i className="fas fa-check-circle"></i>
                           </button>
                         )}
-
-                        {/* Approve button if rejected */}
                         {participant.project_enroll_status === "rejected" && (
                           <button
                             onClick={(e) => {
@@ -291,8 +308,6 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                             Approve
                           </button>
                         )}
-
-                        {/* Send to Admin for proof-submitted */}
                         {participant.project_enroll_status ===
                           "proof-submitted" && (
                           <button
@@ -307,12 +322,8 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                             <i className="fas fa-eye"></i>
                           </button>
                         )}
-
-                         {/* Eye button in case of completed */}
-                         {participant.project_enroll_status ===
-                          "completed" || 
-                          participant.project_enroll_status === "rejected_by_admin" &&
-                          (
+                        {(participant.project_enroll_status === "completed" ||
+                          participant.project_enroll_status === "rejected_by_admin") && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -325,16 +336,13 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                             <i className="fas fa-eye"></i>
                           </button>
                         )}
-
-                        {/* For other statuses, show Approve & Reject */}
                         {participant.project_enroll_status !== "approved" &&
                           participant.project_enroll_status !== "rejected" &&
                           participant.project_enroll_status !==
                             "proof-submitted" &&
-                            participant.project_enroll_status !==
-                            "completed" && 
-                            participant.project_enroll_status != "rejected_by_admin" &&
-                            (
+                          participant.project_enroll_status !== "completed" &&
+                          participant.project_enroll_status !==
+                            "rejected_by_admin" && (
                             <>
                               <button
                                 className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
@@ -352,10 +360,8 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                                 className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleEnrollmentAction(
-                                    participant.id,
-                                    "rejected"
-                                  );
+                                  setParticipantToReject(participant);
+                                  setShowRejectModal(true);
                                 }}
                               >
                                 Reject
@@ -368,6 +374,40 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Enter Remark to Reject</h2>
+            <textarea
+              className="w-full p-2 border rounded mb-4"
+              rows={4}
+              placeholder="Enter reason for rejection"
+              value={rejectRemark}
+              onChange={(e) => setRejectRemark(e.target.value)}
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectRemark("");
+                  setParticipantToReject(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                onClick={handleRejectConfirm}
+              >
+                Reject
+              </button>
+            </div>
           </div>
         </div>
       )}

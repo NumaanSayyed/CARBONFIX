@@ -227,20 +227,26 @@ const VerificationTable: React.FC = () => {
                   </button>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => approveProof(participant.id, "Approved by admin")}
-                      className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600"
-                    >
-                      <i className="fas fa-check mr-1"></i>Validate
-                    </button>
-                    <button
-                      onClick={() => openRejectModal(participant.id)}
-                      className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
-                    >
-                      <i className="fas fa-times mr-1"></i>Reject
-                    </button>
-                  </div>
+                  {participant.status === "approved_by_admin" ? (
+                    <span className="text-green-600 font-semibold">Proof Approved</span>
+                  ) : participant.status === "rejected_by_admin" ? (
+                    <span className="text-red-600 font-semibold">Proof Rejected</span>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => approveProof(participant.id, "Approved by admin")}
+                        className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600"
+                      >
+                        <i className="fas fa-check mr-1"></i>Validate
+                      </button>
+                      <button
+                        onClick={() => openRejectModal(participant.id)}
+                        className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                      >
+                        <i className="fas fa-times mr-1"></i>Reject
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

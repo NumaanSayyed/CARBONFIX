@@ -94,11 +94,11 @@ const EnrolledParticipants: React.FC = () => {
   const filterParticipants = (participants: Participant[]) => {
     return participants.filter((participant) => {
       const matchesSearchTerm = searchTerm
-        ? participant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ? participant.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
           participant.serviceType
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          participant.location.toLowerCase().includes(searchTerm.toLowerCase())
+          participant.location.toLowerCase().includes(searchTerm.toLowerCase().trim())
         : true;
 
       const matchesStatus =
