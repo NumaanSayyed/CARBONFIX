@@ -44,7 +44,7 @@ const StatCard: React.FC<{ icon: string; value: number; label: string }> = ({
         <i className={`fas ${icon}`}></i>
       </div>
       <div className="text-4xl font-bold text-gray-800 mb-2">
-        {value.toLocaleString()}
+        {value}
       </div>
       <div className="text-lg text-gray-600">{label}</div>
     </div>

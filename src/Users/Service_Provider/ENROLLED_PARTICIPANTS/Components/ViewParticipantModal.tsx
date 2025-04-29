@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { backend_url } from "../../../../backend_route";
-import { formatDate } from "../../../../Helpers/Helpers";
+import { formatDate, getWithExpirationCheck } from "../../../../Helpers/Helpers";
 
 interface Participant {
   id: string;
@@ -48,21 +48,6 @@ const ViewParticipantModal: React.FC<ViewParticipantModalProps> = ({
       fetchProofs();
     }
   }, [showViewModal, selectedParticipant]);
-
-  const getWithExpirationCheck = (key: string) => {
-    const dataString = localStorage.getItem(key);
-    if (!dataString) return null;
-
-    const data = JSON.parse(dataString);
-    const currentTime = new Date().getTime();
-
-    if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key); // Remove expired item
-      return null; // Item expired
-    }
-
-    return data.value; // Item is still valid
-  };
 
   const fetchProofs = async () => {
     try {
@@ -166,8 +151,6 @@ const ViewParticipantModal: React.FC<ViewParticipantModalProps> = ({
           </div>
 
           {/* Participant Info */}
-
-          {/* Use these color scheme for showing the status  */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div>
               <p className="text-sm text-gray-500">Status</p>

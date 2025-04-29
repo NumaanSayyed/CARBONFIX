@@ -61,46 +61,7 @@ const Testimonial: React.FC = () => {
       apiResponse("Error fetching feedbacks!", "bg-red-500");
     }
   };
-
-  // const checkFeedbackStatus = async () => {
-  //   if (!user) {
-  //     setHasGivenFeedback(null);
-  //     return;
-  //   }
-
-  //   const participantId = user?.id;
-  //   const serviceProviderId = user?.id;
-
-  //   console.log("user id in status function",participantId);
-  //   console.log("user id in status function ",serviceProviderId);
-
-  //   if (!participantId && !serviceProviderId) {
-  //     setHasGivenFeedback(null);
-  //     return;
-  //   }
-
-  //   const params: {
-  //     participant_id?: string;
-  //     service_provider_id?: string;
-  //   } = {};
-
-  //   if (participantId) {
-  //     params.participant_id = participantId;
-  //   } else if (serviceProviderId) {
-  //     params.service_provider_id = serviceProviderId;
-  //   }
-
-  //   try {
-  //     const response = await axios.get(`${backend_url}/feedback/status`, {
-  //       params,
-  //     });
-  //     setHasGivenFeedback(response.data.hasGivenFeedback);
-  //   } catch (error) {
-  //     console.error("Error checking feedback status:", error);
-  //     setHasGivenFeedback(null);
-  //   }
-  // };
-
+  
   const checkFeedbackStatus = async () => {
     if (!user || !user.id) {
       setHasGivenFeedback(null);
@@ -139,7 +100,7 @@ const Testimonial: React.FC = () => {
     <div className="container mx-auto px-6 py-24 bg-gradient-to-b from-green-50 to-white">
       <div className="text-center mb-8">
         <h2 className="text-4xl font-bold text-gray-800 mb-2">
-          What Our Users Say
+        Hear From Those Leading the Charge!
         </h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
           Real stories from people making a difference in our global

@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { backend_url } from "../../backend_route";
+import { getWithExpirationCheck } from "../../Helpers/Helpers";
 
 interface Student {
   id: string;
   name: string;
   avatar: string;
   status: "Completed" | "WIP";
+  carbonCredits:number;
+  enrollmentDate:string;
   enrolled: {
     project: string;
-    enrollmentDate: string;
-    carbonPoints: number;
+    projectEnrollmentDate: string;
+    projectCarbonPoints: number;
     project_enroll_status: "Completed" | "WIP";
   }[];
   email: string;
@@ -17,85 +22,41 @@ interface Student {
 const StudentList: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [expandedStudentId, setExpandedStudentId] = useState<string | null>(
-    null
-  );
+  const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
 
   useEffect(() => {
-    setStudents([
-      {
-        id: "S1001",
-        name: "Emily Richardson",
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-        status: "Completed",
-        enrolled: [
-          {
-            project: "Forestation",
-            enrollmentDate: "2025-02-28",
-            carbonPoints: 200,
-            project_enroll_status: "Completed",
+    const fetchStudents = async () => {
+      try {
+        const response = await axios.get(`${backend_url}/college/student-list`, {
+          headers: {
+            Authorization: `Bearer ${getWithExpirationCheck("token")}`,
           },
-          {
-            project: "Water Conservation",
-            enrollmentDate: "2025-03-10",
-            carbonPoints: 150,
-            project_enroll_status: "WIP",
-          },
-        ],
-        email: "emily@example.com",
-      },
-      {
-        id: "S1002",
-        name: "Michael Anderson",
-        avatar: "https://randomuser.me/api/portraits/men/50.jpg",
-        status: "WIP",
-        enrolled: [
-          {
-            project: "Water Conservation",
-            enrollmentDate: "2025-03-01",
-            carbonPoints: 150,
-            project_enroll_status: "WIP",
-          },
-        ],
-        email: "michael@example.com",
-      },
-      {
-        id: "S1003",
-        name: "Sarah Williams",
-        avatar: "https://randomuser.me/api/portraits/women/48.jpg",
-        status: "WIP",
-        enrolled: [
-          {
-            project: "Soil Restoration",
-            enrollmentDate: "2025-03-03",
-            carbonPoints: 80,
-            project_enroll_status: "WIP",
-          },
-          {
-            project: "Wind Energy Initiative",
-            enrollmentDate: "2025-03-07",
-            carbonPoints: 120,
-            project_enroll_status: "Completed",
-          },
-        ],
-        email: "sarah@example.com",
-      },
-      {
-        id: "S1004",
-        name: "David Martinez",
-        avatar: "https://randomuser.me/api/portraits/men/52.jpg",
-        status: "Completed",
-        enrolled: [
-          {
-            project: "Solar Energy Initiative",
-            enrollmentDate: "2025-03-05",
-            carbonPoints: 300,
-            project_enroll_status: "Completed",
-          },
-        ],
-        email: "david@example.com",
-      },
-    ]);
+        });
+
+        const fetchedStudents = response.data.map((student: any, index: number) => ({
+          id: `S${1001 + index}`,
+          name: student.full_name,
+          avatar: `https://tse4.mm.bing.net/th?id=OIP.9BVL-wy_acR02ymiRXskpQHaHa&pid=Api&P=0&h=180`,
+          carbonCredits:student.total_carbon_credits ?? 0,
+          enrollmentDate:new Date(student.date_of_joining).toISOString().split("T")[0],
+          status: student.projects.some((p: any) => p.project_enroll_status === "WIP") ? "WIP" : "Completed",
+          enrolled: student.projects.map((project: any) => ({
+            project: project.project_name,
+            carbonCredits:student.total_carbon_credits ?? 0,
+            // projectEnrollmentDate: new Date(student.date_of_joining).toISOString().split("T")[0],
+            projectCarbonPoints: student.total_carbon_credits ?? 0,
+            project_enroll_status: "NA", // static fallback; replace if available from backend
+          })),
+          email: student.email,
+        }));
+
+        setStudents(fetchedStudents);
+      } catch (error) {
+        console.error("Error fetching student data:", error);
+      }
+    };
+
+    fetchStudents();
   }, []);
 
   const toggleStudentDetails = (studentId: string) => {
@@ -106,9 +67,7 @@ const StudentList: React.FC = () => {
     <div className="bg-gray-50 min-h-screen flex flex-col justify-center items-center">
       <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 mt-24 mb-16 max-w-7xl w-full">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Enrolled Students
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800">Enrolled Students</h2>
           <input
             type="text"
             placeholder="Search students..."
@@ -122,21 +81,16 @@ const StudentList: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {[
-                  "S.No",
-                  "Student",
-                  "Email",
-                  "Project",
-                  "Carbon Credits",
-                  "Join Date On CarbonFix",
-                ].map((heading) => (
-                  <th
-                    key={heading}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    {heading}
-                  </th>
-                ))}
+                {["S.No", "Student", "Email", "Project", "Carbon Credits", "Join Date On CarbonFix"].map(
+                  (heading) => (
+                    <th
+                      key={heading}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {heading}
+                    </th>
+                  )
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -159,21 +113,14 @@ const StudentList: React.FC = () => {
                         />
                         {student.name}
                       </td>
-                      <td className="px-6 py-4 text-gray-500">
-                        {student.email}
-                      </td>
+                      <td className="px-6 py-4 text-gray-500">{student.email}</td>
                       <td className="px-6 py-4">
                         {student.enrolled.map((e) => e.project).join(", ")}
                       </td>
                       <td className="px-6 py-4 font-semibold text-gray-900">
-                        {student.enrolled.reduce(
-                          (sum, e) => sum + e.carbonPoints,
-                          0
-                        )}
+                        {student.carbonCredits}
                       </td>
-                      <td className="px-6 py-4">
-                        {student.enrolled[0].enrollmentDate}
-                      </td>
+                      <td className="px-6 py-4">{student.enrollmentDate}</td>
                     </tr>
 
                     {expandedStudentId === student.id && (
@@ -192,8 +139,8 @@ const StudentList: React.FC = () => {
                               className="grid grid-cols-5 gap-4 text-sm text-gray-600 border-b py-2"
                             >
                               <p>{enrollment.project}</p>
-                              <p>{enrollment.enrollmentDate}</p>
-                              <p>{enrollment.carbonPoints}</p>
+                              <p>{"NA"}</p>
+                              <p>{`NA`}</p>
                               <p>
                                 <span
                                   className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -205,8 +152,8 @@ const StudentList: React.FC = () => {
                                   {enrollment.project_enroll_status}
                                 </span>
                               </p>
-
-                              <p>{enrollment.carbonPoints * 0.1} CC</p>
+                              {/* <p>{enrollment.projectCarbonPoints * 0.1} CC</p> */}
+                              <p>{"NA"} CC</p>
                             </div>
                           ))}
                         </td>

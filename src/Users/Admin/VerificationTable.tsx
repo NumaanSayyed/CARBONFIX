@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { backend_url } from "../../backend_route";
-import { apiResponse } from "../../Helpers/Helpers";
+import { apiResponse, getWithExpirationCheck } from "../../Helpers/Helpers";
 
 const VerificationTable: React.FC = () => {
   const [showProofModal, setShowProofModal] = useState(false);
@@ -11,17 +11,17 @@ const VerificationTable: React.FC = () => {
   const [selectedProofId, setSelectedProofId] = useState<string | null>(null);
   const [rejectRemark, setRejectRemark] = useState("");
 
-  const getWithExpirationCheck = (key: string) => {
-    const dataString = localStorage.getItem(key);
-    if (!dataString) return null;
-    const data = JSON.parse(dataString);
-    const currentTime = new Date().getTime();
-    if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key);
-      return null;
-    }
-    return data.value;
-  };
+  // const getWithExpirationCheck = (key: string) => {
+  //   const dataString = localStorage.getItem(key);
+  //   if (!dataString) return null;
+  //   const data = JSON.parse(dataString);
+  //   const currentTime = new Date().getTime();
+  //   if (currentTime > data.expirationTime) {
+  //     localStorage.removeItem(key);
+  //     return null;
+  //   }
+  //   return data.value;
+  // };
 
   const approveProof = async (proofId: string, remark: string) => {
     try {

@@ -8,6 +8,7 @@ import ViewParticipantModal from "./Components/ViewParticipantModal";
 import UpdateProofStatusModal from "./Components/UpdateProofStatusModal";
 import ParticipantList from "./Components/ParticipantList";
 import { backend_url } from "../../../backend_route";
+import { getWithExpirationCheck } from "../../../Helpers/Helpers";
 
 // Participant Type
 interface Participant {
@@ -130,22 +131,6 @@ const EnrolledParticipants: React.FC = () => {
       );
     });
   };
-
-  const getWithExpirationCheck = (key: string) => {
-    const dataString = localStorage.getItem(key);
-    if (!dataString) return null;
-
-    const data = JSON.parse(dataString);
-    const currentTime = new Date().getTime();
-
-    if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key);
-      return null;
-    }
-
-    return data.value;
-  };
-
   const fetchParticipants = async () => {
     if (!projectId) {
       setError("Project ID is missing");

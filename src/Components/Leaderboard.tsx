@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { backend_url } from "../backend_route";
 
-//static fb for missing avat
+//static fb for missing avatar
 const defaultAvatar =
   "https://tse4.mm.bing.net/th?id=OIP.9BVL-wy_acR02ymiRXskpQHaHa&pid=Api&P=0&h=180"; // Fallback image for avatar
 
 const Leaderboard: React.FC = () => {
-  const topColleges = [
-    { name: "Stanford University", credits: 25890, icon: "🌲" },
-    { name: "MIT", credits: 23456, icon: "🌱" },
-    { name: "Harvard University", credits: 21234, icon: "🍃" },
-    { name: "UC Berkeley", credits: 19876, icon: "🌿" },
-  ];
+  // State to hold the top colleges fetched from the backend
+  const [topColleges, setTopColleges] = useState<
+    { name: string; credits: number; icon: string }[]
+  >([]);
 
   // Static fallback data for top participants
   const staticTopParticipants = [
@@ -32,27 +30,51 @@ const Leaderboard: React.FC = () => {
       try {
         const response = await fetch(
           `${backend_url}/participants/top-participant`
-        ); // Update this URL based on your API endpoint
+        );
         const data = await response.json();
 
         if (response.ok && data.topParticipants) {
-          // Map the data from backend to fit the structure needed for the UI
           const participants = data.topParticipants.map((participant: any) => ({
             name: `${participant.first_name} ${participant.last_name}`,
             credits: participant.total_carbon_credits,
-            avatar: defaultAvatar, // Set default avatar if not present in backend data
+            avatar: defaultAvatar,
           }));
           setTopParticipants(participants);
         } else {
-          setTopParticipants(staticTopParticipants); // Fallback to static data if the response is empty or malformed
+          setTopParticipants(staticTopParticipants);
         }
       } catch (error) {
         console.error("Error fetching top participants:", error);
-        setTopParticipants(staticTopParticipants); // Fallback to static data if there is an error
+        setTopParticipants(staticTopParticipants);
       }
     };
 
     fetchTopParticipants();
+  }, []);
+
+  // Fetch top colleges from the backend API
+  useEffect(() => {
+    const fetchTopColleges = async () => {
+      try {
+        const response = await fetch(
+          `${backend_url}/college/top-college`
+        );
+        const data = await response.json();
+
+        if (response.ok && data.topColleges) {
+          const colleges = data.topColleges.map((col: any, i: number) => ({
+            name: col.college,
+            credits: col.total_carbon_credits,
+            icon: ["🌲", "🌱", "🍃", "🌿", "🍀", "🌳"][i] || "🌿",
+          }));
+          setTopColleges(colleges);
+        }
+      } catch (error) {
+        console.error("Error fetching top colleges:", error);
+      }
+    };
+
+    fetchTopColleges();
   }, []);
 
   return (

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { backend_url } from "../backend_route";
+import { getWithExpirationCheck } from "./Helpers";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -78,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } else if (type === "admin") {
         route = "/dashboard/admin";
       } else if (type === "College") {
-        route = "/";
+        route = "/dashboard/college";
       }
 
       localStorage.setItem(
@@ -102,22 +103,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUserType(null);
     setUser(null);
     setProfileRoute("/profile");
-  };
-
-  const getWithExpirationCheck = (key: string) => {
-    const item = localStorage.getItem(key);
-    if (!item) return null;
-    try {
-      const { value, expirationTime } = JSON.parse(item);
-      if (new Date().getTime() > expirationTime) {
-        localStorage.removeItem(key);
-        return null;
-      }
-      return value;
-    } catch {
-      localStorage.removeItem(key);
-      return null;
-    }
   };
 
   useEffect(() => {

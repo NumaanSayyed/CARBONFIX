@@ -45,7 +45,7 @@ const Dashboard: React.FC = () => {
         name: project.project_name,
         category: project.project_category,
         credits: project.carbon_credits,
-        project_status: "Active", // Default status
+        project_status: "Active",
         id: project.id,
         start_date: project.start_date,
         end_date: project.end_date,
@@ -83,23 +83,23 @@ const Dashboard: React.FC = () => {
     const data = JSON.parse(dataString);
     const currentTime = new Date().getTime();
     if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key); // Remove expired item
-      return null; // Item expired
+      localStorage.removeItem(key);
+      return null;
     }
-    return data.value; // Item is still valid
+    return data.value;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Remarks validation (100 to 200 characters)
-    if (remarks.length <= 250) {
-      setIsRemarkValid(false); // Invalid remark
-      setModalMessage("Remarks must be between 100 and 200 characters.");
+    // Remarks validation (20 to 250 characters)
+    if (remarks.length < 20 || remarks.length > 250) {
+      setIsRemarkValid(false);
+      setModalMessage("Remarks must be between 20 and 250 characters.");
       setIsModalOpen(true);
-      return; // Prevent form submission
+      return;
     } else {
-      setIsRemarkValid(true); // Valid remark
+      setIsRemarkValid(true);
     }
 
     const token = getWithExpirationCheck("token");
@@ -120,7 +120,6 @@ const Dashboard: React.FC = () => {
     };
 
     try {
-      //@ts-ignore
       const response = await axios.post(
         `${backend_url}/serviceProviders/addProject`,
         requestData,
@@ -136,7 +135,7 @@ const Dashboard: React.FC = () => {
       document.body.appendChild(successDiv);
       setTimeout(() => successDiv.remove(), 3000);
 
-      // ✅ Clear form fields
+      // Clear form fields
       setSelectedCategory("");
       setProgramName("");
       setCarbonCredits("");
@@ -153,22 +152,13 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  //@ts-ignore
-  const getTomorrowDate = () => {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    return tomorrow.toISOString().split("T")[0]; // Format: YYYY-MM-DD
-  };
-
   const getMinCompletionDate = () => {
-    if (!startDate) return ""; // No min if start date not selected
+    if (!startDate) return "";
     const date = new Date(startDate);
-    date.setDate(date.getDate() + 1); // Next day after start
+    date.setDate(date.getDate() + 1);
     return date.toISOString().split("T")[0];
   };
 
-//@ts-ignore
   const handleUpdate = async (updatedProgram: any) => {
     try {
       const token = getWithExpirationCheck("token");
@@ -187,7 +177,7 @@ const Dashboard: React.FC = () => {
         name: project.project_name,
         category: project.project_category,
         credits: project.carbon_credits,
-        status: "Active",
+        project_status: "Active",
         id: project.id,
         start_date: project.start_date,
         end_date: project.end_date,
@@ -200,13 +190,14 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  //@ts-ignore
-
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`${backend_url}/serviceProviders/projects/${id}`, {
-        headers: { Authorization: `Bearer ${getWithExpirationCheck("token")}` },
-      });
+      await axios.delete(
+        `${backend_url}/serviceProviders/projects/${id}`,
+        {
+          headers: { Authorization: `Bearer ${getWithExpirationCheck("token")}` },
+        }
+      );
       setModalMessage("Project deleted successfully!");
       setIsModalOpen(true);
       fetchProjects();
@@ -222,12 +213,10 @@ const Dashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300">
         {/* Header Section */}
         <Header />
+
         {/* Action Buttons */}
         <ActionButton setIsModalOpen={setIsModalOpen} />
-        {/* Navigation Button */}
-        <NavigationButton
-          onClick={() => console.log("Navigating to Enrolled Participants...")}
-        />
+
         {loading ? (
           <div className="flex justify-center">
             <i className="fas fa-circle-notch fa-spin"></i>
@@ -244,37 +233,37 @@ const Dashboard: React.FC = () => {
         ) : (
           <p className="text-center text-gray-500">No projects available.</p>
         )}
-        {isDetailModalOpen &&
-          (selectedProgram ? (
-            <DetailModal
-              isOpen={isDetailModalOpen}
-              program={selectedProgram}
-              onClose={() => setIsDetailModalOpen(false)}
-              onUpdate={handleUpdate}
-              fetchProjects={fetchProjects}
-            />
-          ) : (
-            <div>Loading details...</div>
-          ))}
 
-        {/* Modal */}
+        {isDetailModalOpen && selectedProgram && (
+          <DetailModal
+            isOpen={isDetailModalOpen}
+            program={selectedProgram}
+            onClose={() => setIsDetailModalOpen(false)}
+            onUpdate={handleUpdate}
+            fetchProjects={fetchProjects}
+            // onDelete={handleDelete}
+          />
+        )}
+
+        {/* General Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
               <p className="text-center text-gray-800 mb-4">{modalMessage}</p>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 !rounded-button whitespace-nowrap"
+                className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300"
               >
                 Close
               </button>
             </div>
           </div>
         )}
-        {/* Add New Service Modal */}
+
+        {/* Add New Project Modal */}
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Service Category */}
+            {/* Category */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
                 Service Type
@@ -293,6 +282,7 @@ const Dashboard: React.FC = () => {
                 <option value="Animal">Animal</option>
               </select>
             </div>
+
             {/* Project Name */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
@@ -306,6 +296,7 @@ const Dashboard: React.FC = () => {
                 required
               />
             </div>
+
             {/* Carbon Credits */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
@@ -319,6 +310,8 @@ const Dashboard: React.FC = () => {
                 required
               />
             </div>
+
+            {/* Start Date */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
                 Project Start Date
@@ -331,7 +324,8 @@ const Dashboard: React.FC = () => {
                 required
               />
             </div>
-            {/* Estimated Completion Date */}
+
+            {/* Completion Date */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
                 Estimated Completion Date
@@ -345,7 +339,8 @@ const Dashboard: React.FC = () => {
                 required
               />
             </div>
-            {/* Project Location */}
+
+            {/* Location */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
                 Project Location
@@ -358,6 +353,7 @@ const Dashboard: React.FC = () => {
                 required
               />
             </div>
+
             {/* Remarks */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
@@ -371,8 +367,11 @@ const Dashboard: React.FC = () => {
                 }`}
                 required
               />
-              <span>Remark must be of 250 characters</span>
+              <span className="text-xs text-gray-500">
+                Remarks must be between 20 and 250 characters
+              </span>
             </div>
+
             {/* Submit Button */}
             <button
               type="submit"

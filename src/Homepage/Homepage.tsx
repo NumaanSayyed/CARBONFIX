@@ -31,13 +31,13 @@ const Homepage: React.FC = () => {
         const response = await axios.get(`${backend_url}/homepage/stats`);
         const {
           total_participants,
-          total_carbon_credits,
+          total_generated_carbon_credits,
           total_service_providers,
         } = response.data;
 
         setTargetStats({
           participants: total_participants,
-          carbonCredits: total_carbon_credits,
+          carbonCredits: total_generated_carbon_credits,
           college: 0,
           servicePro: total_service_providers,
         });

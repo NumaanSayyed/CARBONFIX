@@ -3,6 +3,7 @@ import axios from "axios";
 import EditModal from "./EditModal";
 import { useNavigate } from "react-router-dom";
 import { backend_url } from "../../backend_route";
+import { getWithExpirationCheck } from "../../Helpers/Helpers";
 
 interface Program {
   id: number;
@@ -61,20 +62,6 @@ const DetailModal: React.FC<DetailModalProps> = ({
       default:
         return "fa-leaf";
     }
-  };
-  const getWithExpirationCheck = (key: string) => {
-    const dataString = localStorage.getItem(key);
-    if (!dataString) return null;
-
-    const data = JSON.parse(dataString);
-    const currentTime = new Date().getTime();
-
-    if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key); // Remove expired item
-      return null; // Item expired
-    }
-
-    return data.value; // Item is still valid
   };
 
   const handleDelete = async (id: number) => {

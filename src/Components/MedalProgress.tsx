@@ -1,13 +1,15 @@
-// The exported code uses Tailwind CSS. Install Tailwind CSS in your dev environment to ensure all styles work.
-
+import axios from "axios";
 import React, { useState, useEffect } from "react";
+import { backend_url } from "../backend_route";
+import { getWithExpirationCheck } from "../Helpers/Helpers";
 
 const MedalProgress: React.FC = () => {
   const [activeLevel, setActiveLevel] = useState<string>("Bronze");
 
   // User's current credits
-  //@ts-ignore
-  const [userCredits, setUserCredits] = useState<number>(35);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [, setLoading] = useState<boolean>(true);
+  const [, setError] = useState<string | null>(null);
 
   // Medal level data
   const medalLevels = [
@@ -37,20 +39,40 @@ const MedalProgress: React.FC = () => {
     },
   ];
 
-  // Calculate current level based on user credits
-  useEffect(() => {
-    for (let i = medalLevels.length - 1; i >= 0; i--) {
-      if (userCredits >= medalLevels[i].required) {
-        setActiveLevel(medalLevels[i].name);
-        break;
-      } else if (i === 0 && userCredits < medalLevels[0].required) {
-        setActiveLevel("Bronze"); // Default to Bronze if below all thresholds
-      }
+  const fetchCredits = async () => {
+    const token = getWithExpirationCheck("token");
+
+    if (!token) {
+      setError("No valid token found");
+      setLoading(false);
+      return;
     }
-  }, [userCredits]);
+
+    try {
+      const response = await axios.get(`${backend_url}/participants/carbon-credits`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token as Bearer in Authorization header
+        },
+      });
+
+      // Use the correct key total_carbon_credits from the response
+      setCredits(response.data.total_carbon_credits);
+    } catch (err) {
+      console.error("Error fetching credits:", err); // Log any error
+      setError("Failed to fetch credits");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCredits();
+  }, []);
 
   // Calculate progress percentage for circular progress
-  const calculateProgress = (level: { required: number; name: string }) => {
+  const calculateProgress = (level: { required: number; name: string; }) => {
+    const userCredits = credits ?? 0; // Default to 0 if credits is null
+
     // For completed levels
     if (userCredits >= level.required) {
       return 100;
@@ -83,7 +105,7 @@ const MedalProgress: React.FC = () => {
           <div className="mt-4 bg-green-50 rounded-lg p-3 inline-block">
             <p className="text-green-700 font-medium">
               Your Current Credits:{" "}
-              <span className="text-2xl font-bold">{userCredits}</span>
+              <span className="text-2xl font-bold">{credits ?? 0}</span> {/* Display 0 if credits is null */}
             </p>
           </div>
         </div>
@@ -92,14 +114,13 @@ const MedalProgress: React.FC = () => {
           {medalLevels.map((level) => {
             const progress = calculateProgress(level);
             const isActive = activeLevel === level.name;
-            const isCompleted = userCredits >= level.required;
+            const isCompleted = (credits ?? 0) >= level.required;
 
             return (
               <div
                 key={level.name}
-                className={`relative flex flex-col items-center p-6 rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer ${
-                  isActive ? "bg-green-50 shadow-md" : "bg-white shadow"
-                }`}
+                className={`relative flex flex-col items-center p-6 rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer ${isActive ? "bg-green-50 shadow-md" : "bg-white shadow"
+                  }`}
                 onClick={() => setActiveLevel(level.name)}
               >
                 {/* Progress Circle */}
@@ -162,81 +183,29 @@ const MedalProgress: React.FC = () => {
 
                 {/* Progress text */}
                 <p className="text-sm text-gray-500">
-                  {Math.min(userCredits, level.required)}/{level.required}{" "}
+                  {Math.min(credits ?? 0, level.required)}/{level.required}{" "}
                   credits
                 </p>
 
                 {/* Status label */}
                 <div
-                  className={`mt-3 px-3 py-1 rounded-full text-xs font-medium ${
-                    isCompleted
+                  className={`mt-3 px-3 py-1 rounded-full text-xs font-medium ${isCompleted
                       ? "bg-green-100 text-green-800"
                       : isActive
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
                 >
                   {isCompleted
                     ? "Achieved"
                     : isActive
-                    ? "In Progress"
-                    : "Locked"}
+                      ? "In Progress"
+                      : "Locked"}
                 </div>
               </div>
             );
           })}
         </div>
-
-        {/* Action buttons */}
-        {/* <div className="mt-10 flex flex-wrap justify-center gap-4">
-                    <button
-                        className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-button whitespace-nowrap transition-colors shadow-md flex items-center"
-                        onClick={() => setUserCredits(prev => prev + 10)}
-                    >
-                        <i className="fas fa-plus mr-2"></i>
-                        Earn 10 Credits
-                    </button>
-
-                    <button
-                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-button whitespace-nowrap transition-colors shadow-md flex items-center"
-                    >
-                        <i className="fas fa-trophy mr-2"></i>
-                        View All Achievements
-                    </button>
-
-                    <button
-                        className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-button whitespace-nowrap transition-colors shadow-md flex items-center"
-                    >
-                        <i className="fas fa-exchange-alt mr-2"></i>
-                        Redeem Credits
-                    </button>
-                </div> */}
-
-        {/* Tips section */}
-        {/* <div className="mt-10 bg-blue-50 rounded-lg p-6">
-                    <h3 className="text-xl font-bold text-blue-800 mb-3 flex items-center">
-                        <i className="fas fa-lightbulb mr-2 text-yellow-500"></i>
-                        How to Earn More Carbon Credits
-                    </h3>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <li className="flex items-start">
-                            <i className="fas fa-leaf text-green-500 mt-1 mr-2"></i>
-                            <span>Plant trees through our partner programs</span>
-                        </li>
-                        <li className="flex items-start">
-                            <i className="fas fa-bicycle text-green-500 mt-1 mr-2"></i>
-                            <span>Track and log your eco-friendly commutes</span>
-                        </li>
-                        <li className="flex items-start">
-                            <i className="fas fa-solar-panel text-green-500 mt-1 mr-2"></i>
-                            <span>Install renewable energy solutions at home</span>
-                        </li>
-                        <li className="flex items-start">
-                            <i className="fas fa-recycle text-green-500 mt-1 mr-2"></i>
-                            <span>Participate in community recycling events</span>
-                        </li>
-                    </ul>
-                </div> */}
       </div>
     </div>
   );

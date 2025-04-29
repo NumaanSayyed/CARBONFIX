@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { backend_url } from "../../../../backend_route";
+import { getWithExpirationCheck } from "../../../../Helpers/Helpers";
 
 interface UpdateProofStatusModalProps {
   showUpdateModal: boolean;
@@ -45,21 +46,6 @@ const UpdateProofStatusModal: React.FC<UpdateProofStatusModalProps> = ({
       setVideoFile(file);
       setVideoURL("");
     }
-  };
-
-  const getWithExpirationCheck = (key: string) => {
-    const dataString = localStorage.getItem(key);
-    if (!dataString) return null;
-
-    const data = JSON.parse(dataString);
-    const currentTime = new Date().getTime();
-
-    if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key); // Remove expired item
-      return null; // Item expired
-    }
-
-    return data.value; // Item is still valid
   };
 
   const handleUpdate = async () => {

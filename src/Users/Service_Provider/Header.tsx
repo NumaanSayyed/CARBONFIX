@@ -3,6 +3,7 @@ import * as echarts from "echarts";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { backend_url } from "../../backend_route";
+import { getWithExpirationCheck } from "../../Helpers/Helpers";
 
 const Header: React.FC = () => {
   const chartRef = useRef<HTMLDivElement>(null);
@@ -12,22 +13,6 @@ const Header: React.FC = () => {
     generated: number;
     unique_participant: number;
   }>({ committed: 0, generated: 0, unique_participant: 0 });
-
-  // Function to extract email from token
-  const getWithExpirationCheck = (key: string) => {
-    const dataString = localStorage.getItem(key);
-    if (!dataString) return null;
-
-    const data = JSON.parse(dataString);
-    const currentTime = new Date().getTime();
-
-    if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key); // Remove expired item
-      return null; // Item expired
-    }
-
-    return data.value; // Item is still valid
-  };
 
   const getEmailFromToken = () => {
     try {
@@ -166,8 +151,8 @@ const Header: React.FC = () => {
             </h1>
 
             <p className="text-gray-600 text-xl font-light tracking-wide">
-              {serviceProvider
-                ? serviceProvider.org_type
+              {serviceProvider && serviceProvider.org_type
+                ? serviceProvider.org_type.join(", ")
                 : "Conservation Service Type"}
             </p>
             <div className="absolute -top-4 -left-4 w-12 h-12 bg-green-400/20 rounded-full animate-ping"></div>

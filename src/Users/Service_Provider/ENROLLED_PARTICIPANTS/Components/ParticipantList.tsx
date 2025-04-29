@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { backend_url } from "../../../../backend_route";
-import { apiResponse } from "../../../../Helpers/Helpers";
+import { apiResponse, getWithExpirationCheck } from "../../../../Helpers/Helpers";
 
 interface Participant {
   id: string;
@@ -67,18 +67,6 @@ const ParticipantList: React.FC<ParticipantListProps> = ({
   const navigate = useNavigate();
   const formatStandardDate = (dateString: string) => {
     return new Date(dateString).toISOString().split("T")[0];
-  };
-
-  const getWithExpirationCheck = (key: string) => {
-    const dataString = localStorage.getItem(key);
-    if (!dataString) return null;
-    const data = JSON.parse(dataString);
-    const currentTime = new Date().getTime();
-    if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key);
-      return null;
-    }
-    return data.value;
   };
 
   const [showRejectModal, setShowRejectModal] = useState(false);

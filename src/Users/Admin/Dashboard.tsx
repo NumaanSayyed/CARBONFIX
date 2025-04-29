@@ -6,6 +6,7 @@ import VerificationTable from "./VerificationTable";
 import RecentActivity from "./RecentActivity";
 import axios from "axios";
 import { backend_url } from "../../backend_route";
+import { getWithExpirationCheck } from "../../Helpers/Helpers";
 
 const Dashboard: React.FC = () => {
   const [adminDetails, setAdminDetails] = useState<any>(null);
@@ -21,21 +22,6 @@ const Dashboard: React.FC = () => {
       rejected: "+0.00%",
     },
   });
-
-  const getWithExpirationCheck = (key: string) => {
-    const dataString = localStorage.getItem(key);
-    if (!dataString) return null;
-
-    const data = JSON.parse(dataString);
-    const currentTime = new Date().getTime();
-
-    if (currentTime > data.expirationTime) {
-      localStorage.removeItem(key);
-      return null;
-    }
-
-    return data.value;
-  };
 
   useEffect(() => {
     const fetchAdminDetails = async () => {

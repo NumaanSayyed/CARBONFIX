@@ -23,7 +23,8 @@ const Header: React.FC<HeaderProps> = ({
 
   const { isAuthenticated, userType, profileRoute, logout } = useAuth();
 
-  const resolvedUserType = getWithExpirationCheck("userType") || userType;
+  // Normalize the userType value
+  const resolvedUserType = (getWithExpirationCheck("userType") || userType || "").toLowerCase();
 
   useEffect(() => {
     setNavbarTextColor(
@@ -92,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({
               Home
             </Link>
 
-            {resolvedUserType !== "Service Provider" && (
+            {resolvedUserType !== "service provider" && (
               <Link
                 to="/project"
                 onClick={() => setActiveNav("projects")}
@@ -118,18 +119,45 @@ const Header: React.FC<HeaderProps> = ({
 
                 {profileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-40 bg-white rounded shadow-lg z-50">
-                    {resolvedUserType !== "College" && (
+                    {resolvedUserType === "participant" && (
+                      <>
+                        <Link
+                          to={profileRoute}
+                          onClick={() => setProfileMenuOpen(false)}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-100"
+                        >
+                          Profile
+                        </Link>
+                        <Link
+                          to="/participant/project"
+                          onClick={() => setProfileMenuOpen(false)}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-100"
+                        >
+                          My Projects
+                        </Link>
+                      </>
+                    )}
+
+                    {resolvedUserType === "college" && (
+                      <Link
+                        to="/dashboard/college"
+                        onClick={() => setProfileMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-100"
+                      >
+                        Dashboard
+                      </Link>
+                    )}
+
+                    {(resolvedUserType === "service provider" || resolvedUserType === "admin") && (
                       <Link
                         to={profileRoute}
                         onClick={() => setProfileMenuOpen(false)}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-100"
                       >
-                        {resolvedUserType === "Service Provider" ||
-                        resolvedUserType === "admin"
-                          ? "Dashboard"
-                          : "Profile"}
+                        Dashboard
                       </Link>
                     )}
+
                     <button
                       onClick={() => {
                         handleLogout();
@@ -189,7 +217,7 @@ const Header: React.FC<HeaderProps> = ({
                   Home
                 </Link>
 
-                {resolvedUserType !== "Service Provider" && (
+                {resolvedUserType !== "service provider" && (
                   <Link
                     to="/project"
                     onClick={() => {
@@ -204,17 +232,34 @@ const Header: React.FC<HeaderProps> = ({
 
                 {isAuthenticated ? (
                   <>
-                    {resolvedUserType !== "College" && (
+                    {resolvedUserType === "participant" && (
+                      <>
+                        <Link
+                          to={profileRoute}
+                          onClick={() => setIsMenuOpen(false)}
+                          className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg whitespace-nowrap"
+                        >
+                          <i className="fas fa-user mr-2"></i>
+                          Profile
+                        </Link>
+                        <Link
+                          to="/myprojects"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg whitespace-nowrap"
+                        >
+                          <i className="fas fa-clipboard-list mr-2"></i>
+                          My Projects
+                        </Link>
+                      </>
+                    )}
+                    {resolvedUserType === "college" && (
                       <Link
-                        to={profileRoute}
+                        to="/dashboard/college"
                         onClick={() => setIsMenuOpen(false)}
                         className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg whitespace-nowrap"
                       >
-                        <i className="fas fa-user mr-2"></i>
-                        {resolvedUserType === "Service Provider" ||
-                        resolvedUserType === "admin"
-                          ? "Dashboard"
-                          : "Profile"}
+                        <i className="fas fa-chalkboard-teacher mr-2"></i>
+                        Dashboard
                       </Link>
                     )}
                     <button
