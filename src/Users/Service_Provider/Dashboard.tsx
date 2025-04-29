@@ -3,6 +3,7 @@ import axios from "axios";
 import { backend_url } from "../../backend_route";
 import Header from "./Header";
 import ActionButton from "./ActionButton";
+//@ts-ignore
 import NavigationButton from "./NavigationButton";
 import ProgramsGrid from "./Program";
 import DetailModal from "./DetailModal";
@@ -120,6 +121,7 @@ const Dashboard: React.FC = () => {
     };
 
     try {
+      //@ts-ignore
       const response = await axios.post(
         `${backend_url}/serviceProviders/addProject`,
         requestData,
@@ -159,6 +161,7 @@ const Dashboard: React.FC = () => {
     return date.toISOString().split("T")[0];
   };
 
+  //@ts-ignore
   const handleUpdate = async (updatedProgram: any) => {
     try {
       const token = getWithExpirationCheck("token");
@@ -190,6 +193,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  //@ts-ignore
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(

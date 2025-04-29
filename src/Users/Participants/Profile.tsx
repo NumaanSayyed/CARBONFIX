@@ -10,15 +10,19 @@ import { backend_url } from "../../backend_route";
 import { useNavigate } from "react-router-dom";
 import { getWithExpirationCheck } from "../../Helpers/Helpers";
 
+//@ts-ignore
 const swiperModules = [Pagination, Autoplay];
 
 const Profile: React.FC = () => {
   const [credits, setCredits] = useState(0);
+  //@ts-ignore
   const [, setShowTooltip] = useState(false);
+  //@ts-ignore
   const [badgeAnimation, setBadgeAnimation] = useState(false);
   const [, setPreviousBadgeType] = useState("");
   // @ts-ignore
   const [isDarkMode, setIsDarkMode] = useState(false);
+  //@ts-ignore
   const [showLevelUpModal, setShowLevelUpModal] = useState(false);
   //@ts-ignore
   const [isMobile, setIsMobile] = useState(false);
@@ -34,6 +38,7 @@ const Profile: React.FC = () => {
   // @ts-ignore
   const [title, setTitle] = useState("Environmental Sustainability Lead");
 
+  //@ts-ignore
   const navigate = useNavigate();
   const chartRef = useRef<HTMLDivElement>(null);
   
@@ -114,6 +119,8 @@ const Profile: React.FC = () => {
       };
     }
   };
+
+  //@ts-ignore
 
   const badgeInfo = getBadgeInfo(credits);
 

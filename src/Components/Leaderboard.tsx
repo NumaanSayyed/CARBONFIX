@@ -138,7 +138,7 @@ const LeaderboardItem: React.FC<{
       </span>
     </div>
     <div className="text-green-600 font-bold text-sm sm:text-base">
-      {credits.toLocaleString()} credits
+      {credits} credits
     </div>
   </div>
 );
@@ -160,7 +160,7 @@ const ParticipantItem: React.FC<{
       </span>
     </div>
     <div className="text-green-600 font-bold text-sm sm:text-base">
-      {credits.toLocaleString()} credits
+      {credits} credits
     </div>
   </div>
 );
