@@ -5,11 +5,8 @@ import ProjectTrendsChart from "./ProjectTrendsChart";
 import RecentActivities from "./RecentActivities";
 import { backend_url } from "../../backend_route";
 import { getWithExpirationCheck } from "../../Helpers/Helpers";
-// import { backend_url } from "../backend_route";
-// import { getWithExpirationCheck } from "../Helpers/Helpers";
 
 const Dashboard: React.FC = () => {
-  // replace static stats with dynamic state
   const [stats, setStats] = useState({
     students: 0,
     carbonCredits: 0,
@@ -17,6 +14,7 @@ const Dashboard: React.FC = () => {
   });
 
   const [collegeName,setCollegeName] = useState("");
+  const [clgEmail,setClgEmail] = useState("");
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -26,14 +24,18 @@ const Dashboard: React.FC = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
+        console.log(data);
         if (response.ok) {
+
           setStats({
-            students: data.totalParticipants,
-            carbonCredits: data.totalCarbonCredits,
-            activeProjects: data.activeProjects,
+            students: data.total_participants,
+            carbonCredits: data.total_carbon_credits,
+            activeProjects: data.active_projects,
           });
+          
 
           setCollegeName(data.college);
+          setClgEmail(data.email);
         }
       } catch (error) {
         console.error("Error fetching college dashboard:", error);
@@ -45,8 +47,8 @@ const Dashboard: React.FC = () => {
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
       <div className="max-w-[1440px] mx-auto px-6">
-        <Header  collegeName={collegeName} />
-        {/* Pass dynamic stats down */}
+        <Header  collegeName={collegeName} clgEmail={clgEmail} />
+        
         <AnalyticsCards stats={stats} />
         <ProjectTrendsChart />
         <RecentActivities />

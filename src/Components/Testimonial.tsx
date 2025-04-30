@@ -73,13 +73,16 @@ const Testimonial: React.FC = () => {
     const params: {
       participant_id?: string;
       service_provider_id?: string;
+      college_id?:string;
     } = {};
   
     if (resolvedUserType === "Participant") {
       params.participant_id = user.id;
     } else if (resolvedUserType === "Service Provider") {
       params.service_provider_id = user.id;
-    } else {
+    } else if(resolvedUserType === "College"){
+      params.college_id = user.id;
+    }else {
       setHasGivenFeedback(null);
       return;
     }

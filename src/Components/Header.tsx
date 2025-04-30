@@ -243,7 +243,7 @@ const Header: React.FC<HeaderProps> = ({
                           Profile
                         </Link>
                         <Link
-                          to="/myprojects"
+                          to="/participant/project"
                           onClick={() => setIsMenuOpen(false)}
                           className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg whitespace-nowrap"
                         >

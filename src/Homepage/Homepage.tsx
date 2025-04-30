@@ -33,12 +33,13 @@ const Homepage: React.FC = () => {
           total_participants,
           total_generated_carbon_credits,
           total_service_providers,
+          total_colleges
         } = response.data;
 
         setTargetStats({
           participants: total_participants,
           carbonCredits: total_generated_carbon_credits,
-          college: 0,
+          college: total_colleges,
           servicePro: total_service_providers,
         });
       } catch (error) {

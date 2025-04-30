@@ -20,6 +20,8 @@ const Project: React.FC = () => {
   // @ts-ignore
   const { user, userType } = useAuth();
 
+  const resolvedUserType = (getWithExpirationCheck("userType") || userType || "").toLowerCase();
+
   const categories = [
     { name: "Forestation", icon: "fa-tree" },
     { name: "Water", icon: "fa-tint" },
@@ -340,12 +342,19 @@ const matchSearch =
               <strong>Completion Date:</strong>{" "}
               {formatStandardDate(selectedProject.end_date)}
             </p>
-            <button
+
+            {
+              resolvedUserType === "participant" && (
+                <button
               onClick={() => handleJoinProject()}
               className="bg-green-600 text-white mb-3 px-4 py-2 rounded-lg w-full hover:bg-green-700"
             >
               Join Project
             </button>
+              )
+}
+
+
             <button
               onClick={() => setSelectedProject(null)}
               className="bg-red-600 text-white px-4 py-2 rounded-lg w-full hover:bg-red-700"
@@ -370,16 +379,20 @@ const matchSearch =
               >
                 Join Other Project
               </button>
+              {/* {resolvedUserType} */}
 
-              <button
-                onClick={() => {
-                  closeModals();
-                  user ? navigate("/profile") : navigate("/login");
-                }}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300"
-              >
-                Go to Dashboard
-              </button>
+              {resolvedUserType === "participant" && (
+  <button
+    onClick={() => {
+      closeModals();
+      navigate("/profile");
+    }}
+    className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300"
+  >
+    Go to Dashboard
+  </button>
+)}
+
             </div>
           </div>
         </div>

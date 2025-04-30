@@ -80,6 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         route = "/dashboard/admin";
       } else if (type === "College") {
         route = "/dashboard/college";
+        setUser(userData.college);
       }
 
       localStorage.setItem(

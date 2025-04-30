@@ -8,15 +8,20 @@ interface Student {
   name: string;
   avatar: string;
   status: "Completed" | "WIP";
-  carbonCredits:number;
-  enrollmentDate:string;
+  carbonCredits: number;
+  enrollmentDate: string;
   enrolled: {
     project: string;
-    projectEnrollmentDate: string;
+    projectEnrollmentDate?: string;
     projectCarbonPoints: number;
-    project_enroll_status: "Completed" | "WIP";
+    project_enroll_status: string;
+    service_provider_name: string;
+    service_provider_email: string;
+    service_provider_phone: string;
+    project_status: string;
   }[];
   email: string;
+  phone: string;
 }
 
 const StudentList: React.FC = () => {
@@ -35,19 +40,22 @@ const StudentList: React.FC = () => {
 
         const fetchedStudents = response.data.map((student: any, index: number) => ({
           id: `S${1001 + index}`,
-          name: student.full_name,
+          name: student.full_name || "NA",
           avatar: `https://tse4.mm.bing.net/th?id=OIP.9BVL-wy_acR02ymiRXskpQHaHa&pid=Api&P=0&h=180`,
-          carbonCredits:student.total_carbon_credits ?? 0,
-          enrollmentDate:new Date(student.date_of_joining).toISOString().split("T")[0],
-          status: student.projects.some((p: any) => p.project_enroll_status === "WIP") ? "WIP" : "Completed",
+          carbonCredits: student.total_carbon_credits ?? 0,
+          enrollmentDate: new Date(student.date_of_joining).toISOString().split("T")[0],
+          status: student.projects.some((p: any) => p.final_status !== "approved_by_admin") ? "WIP" : "Completed",
           enrolled: student.projects.map((project: any) => ({
-            project: project.project_name,
-            carbonCredits:student.total_carbon_credits ?? 0,
-            // projectEnrollmentDate: new Date(student.date_of_joining).toISOString().split("T")[0],
-            projectCarbonPoints: student.total_carbon_credits ?? 0,
-            project_enroll_status: "NA", // static fallback; replace if available from backend
+            project: project.project_name || "NA",
+            projectCarbonPoints: project.project_carbon_credits ?? 0,
+            project_enroll_status: project.final_status || "NA",
+            service_provider_name: project.service_provider_name || "NA",
+            service_provider_email: project.service_provider_email || "NA",
+            service_provider_phone: project.service_provider_phone || "NA",
+            project_status: project.final_status || "NA",
           })),
-          email: student.email,
+          email: student.email || "NA",
+          phone: student.phone || "NA",
         }));
 
         setStudents(fetchedStudents);
@@ -81,7 +89,7 @@ const StudentList: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {["S.No", "Student", "Email", "Project", "Carbon Credits", "Join Date On CarbonFix"].map(
+                {["S.No", "Student", "Email", "Phone", "Carbon Credits", "Join Date On CarbonFix"].map(
                   (heading) => (
                     <th
                       key={heading}
@@ -96,7 +104,7 @@ const StudentList: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {students
                 .filter((student) =>
-                  student.name.toLowerCase().includes(searchTerm.toLowerCase())
+                  student.name.toLowerCase().includes(searchTerm.toLowerCase().trim())
                 )
                 .map((student, index) => (
                   <React.Fragment key={student.id}>
@@ -113,10 +121,9 @@ const StudentList: React.FC = () => {
                         />
                         {student.name}
                       </td>
-                      <td className="px-6 py-4 text-gray-500">{student.email}</td>
-                      <td className="px-6 py-4">
-                        {student.enrolled.map((e) => e.project).join(", ")}
-                      </td>
+                      {/* Updated email column to wrap text properly */}
+                      <td className="px-6 py-4 text-gray-500 break-words max-w-xs">{student.email}</td>
+                      <td className="px-6 py-4 text-gray-500">{student.phone}</td>
                       <td className="px-6 py-4 font-semibold text-gray-900">
                         {student.carbonCredits}
                       </td>
@@ -126,34 +133,37 @@ const StudentList: React.FC = () => {
                     {expandedStudentId === student.id && (
                       <tr className="bg-gray-50">
                         <td colSpan={6} className="p-4">
-                          <div className="grid grid-cols-5 gap-4 text-sm text-gray-600 font-semibold border-b pb-2">
+                          <div className="grid grid-cols-7 gap-4 text-sm text-gray-600 font-semibold border-b pb-2">
                             <p>Project</p>
-                            <p>Joining Date</p>
-                            <p>Total Credits</p>
+                            <p>SP Name</p>
+                            <p>SP Mail</p>
+                            <p>SP Phone</p>
+                            <p>Project Area</p>
                             <p>Status</p>
                             <p>Estimated CC</p>
                           </div>
                           {student.enrolled.map((enrollment, idx) => (
                             <div
                               key={idx}
-                              className="grid grid-cols-5 gap-4 text-sm text-gray-600 border-b py-2"
+                              className="grid grid-cols-7 gap-4 text-sm text-gray-600 border-b py-2"
                             >
-                              <p>{enrollment.project}</p>
+                              <p>{enrollment.project || "NA"}</p>
+                              <p>{enrollment.service_provider_name || "NA"}</p>
+                              <p>{enrollment.service_provider_email || "NA"}</p>
+                              <p>{enrollment.service_provider_phone || "NA"}</p>
                               <p>{"NA"}</p>
-                              <p>{`NA`}</p>
                               <p>
                                 <span
                                   className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                    enrollment.project_enroll_status === "Completed"
+                                    enrollment.project_status === "approved_by_admin"
                                       ? "bg-green-100 text-green-700"
-                                      : "bg-red-100 text-red-700"
+                                      : "bg-yellow-100 text-yellow-700"
                                   }`}
                                 >
-                                  {enrollment.project_enroll_status}
+                                  {enrollment.project_status || "NA"}
                                 </span>
                               </p>
-                              {/* <p>{enrollment.projectCarbonPoints * 0.1} CC</p> */}
-                              <p>{"NA"} CC</p>
+                              <p>{enrollment.projectCarbonPoints ?? "NA"} CC</p>
                             </div>
                           ))}
                         </td>
