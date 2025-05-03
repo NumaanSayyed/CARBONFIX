@@ -19,6 +19,7 @@ interface Student {
     service_provider_email: string;
     service_provider_phone: string;
     project_status: string;
+    project_area: string;
   }[];
   email: string;
   phone: string;
@@ -53,6 +54,7 @@ const StudentList: React.FC = () => {
             service_provider_email: project.service_provider_email || "NA",
             service_provider_phone: project.service_provider_phone || "NA",
             project_status: project.final_status || "NA",
+            project_area : project.project_area || "NA"
           })),
           email: student.email || "NA",
           phone: student.phone || "NA",
@@ -151,7 +153,7 @@ const StudentList: React.FC = () => {
                               <p>{enrollment.service_provider_name || "NA"}</p>
                               <p>{enrollment.service_provider_email || "NA"}</p>
                               <p>{enrollment.service_provider_phone || "NA"}</p>
-                              <p>{"NA"}</p>
+                              <p>{enrollment.project_area}</p>
                               <p>
                                 <span
                                   className={`px-2 py-1 text-xs font-medium rounded-full ${
